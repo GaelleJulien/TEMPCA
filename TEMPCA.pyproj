@@ -22,6 +22,8 @@
     <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="classes.py" />
+    <Compile Include="mapping.py" />
     <Compile Include="TEMPCA.py" />
   </ItemGroup>
   <ItemGroup>
