@@ -6,7 +6,7 @@ import datetime
 @dataclass
 class Stats :
     id : str
-    actualSleepRate : float
+    actual_sleep_rate : float
 
 
 
