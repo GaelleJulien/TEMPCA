@@ -6,6 +6,7 @@ from openpyxl.styles import PatternFill
 from openpyxl.styles import Font, Color, Alignment, Border, Side
 
 from classes import Stats
+from classes import ToplevelWindow
 from mapping import FRAGMENTATION_INDEX, SLEEP_LATENCY, ACTUAL_WAKE_TIME, SLEEP_EFFICIENCY, LIGHTS_OUT, GOT_UP, TIME_IN_BED, ASSUMED_SLEEP, ACTUAL_SLEEP_TIME
 from mapping import USERID, ACTUAL_SLEEP_RATE, ACTUAL_WAKE_RATE, FELL_ASLEEP, WOKE_UP
 
@@ -13,7 +14,11 @@ import tkinter as tk
 from tkinter import *
 from tkinter import filedialog
 
+import csv
+import pandas as pd
+
 import customtkinter
+
 
 file_path = ""
 
@@ -88,20 +93,27 @@ def loadWorkbook(file_path):
 #epingle la première ligne
     sheet.freeze_panes = "B2"
 
-    print("finiiiii")
     workbook.save(filename= "test.xlsx")
-
+    workbook.save(filename="csvFile.csv")
 
 def UploadAction():
     file_path = filedialog.askopenfilename()
     if file_path is not None:
         print (file_path)
         loadWorkbook(file_path)
+        open_toplevel()
 
+   
+def open_toplevel():
+    toplevel_window = ToplevelWindow()
+
+ 
 
 app = customtkinter.CTk()
 app.geometry("500x200")
 app.title("Gaëlle reigne suprême parmi les mortels")
+
+toplevel_window = None
 
 texte1 = customtkinter.CTkLabel(master = app, text = "Sélectionner le fichier à traiter")
 texte1.place(relx = 0.5, rely=0.3, anchor=CENTER)
