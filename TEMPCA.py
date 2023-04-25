@@ -16,12 +16,32 @@ from tkinter import filedialog
 
 import csv
 import pandas as pd
+from pandastable import Table, TableModel, config
+
 
 import customtkinter
 
 
 file_path = ""
 
+
+class TestApp(Frame):
+        """Basic test frame for the table"""
+        def __init__(self, parent=None):
+            self.parent = parent
+            Frame.__init__(self)
+            self.main = self.master
+            self.main.geometry('600x400+200+100')
+            self.main.title('Table app')
+            f = Frame(self.main)
+            f.pack(fill=BOTH,expand=1)
+            self.table = pt = Table(f, dataframe= pd.DataFrame(pd.read_excel("test.xlsx")))
+            pt.show()
+            options = {'colheadercolor':'green','floatprecision': 5}
+            config.apply_options(options, pt)
+            pt.show()
+        
+        
 
 def loadWorkbook(file_path):
     workbook2 = load_workbook(filename = file_path, read_only=True)
@@ -94,18 +114,18 @@ def loadWorkbook(file_path):
     sheet.freeze_panes = "B2"
 
     workbook.save(filename= "test.xlsx")
-    workbook.save(filename="csvFile.csv")
+    df = pd.DataFrame(pd.read_excel("test.xlsx"))
 
 def UploadAction():
     file_path = filedialog.askopenfilename()
     if file_path is not None:
         print (file_path)
         loadWorkbook(file_path)
-        open_toplevel()
+        
 
    
 def open_toplevel():
-    toplevel_window = ToplevelWindow()
+    toplevel_window = TestApp(app)
 
  
 
@@ -113,13 +133,15 @@ app = customtkinter.CTk()
 app.geometry("500x200")
 app.title("Gaëlle reigne suprême parmi les mortels")
 
-toplevel_window = None
 
 texte1 = customtkinter.CTkLabel(master = app, text = "Sélectionner le fichier à traiter")
 texte1.place(relx = 0.5, rely=0.3, anchor=CENTER)
 
 button = customtkinter.CTkButton(master = app, text='Sélectionner...', command=UploadAction)
 button.place(relx = 0.5, rely=0.5, anchor=CENTER)
+
+button2 = customtkinter.CTkButton(master = app, text='Afficher les données', command=open_toplevel)
+button2.place(relx = 0.5, rely=0.7, anchor=CENTER)
 
 progressbar = customtkinter.CTkProgressBar(app, orientation="horizontal")
 
