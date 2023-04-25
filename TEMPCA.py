@@ -10,7 +10,10 @@ from mapping import FRAGMENTATION_INDEX, SLEEP_LATENCY, ACTUAL_WAKE_TIME, SLEEP_
 from mapping import USERID, ACTUAL_SLEEP_RATE, ACTUAL_WAKE_RATE, FELL_ASLEEP, WOKE_UP
 
 import tkinter as tk
+from tkinter import *
 from tkinter import filedialog
+
+import customtkinter
 
 file_path = ""
 
@@ -96,19 +99,18 @@ def UploadAction():
         loadWorkbook(file_path)
 
 
-window = tk.Tk()
-frame = tk.Frame()
-frame.pack()
+app = customtkinter.CTk()
+app.geometry("500x200")
+app.title("Gaëlle reigne suprême parmi les mortels")
 
-button = tk.Button(window, text='Open', command=UploadAction)
+texte1 = customtkinter.CTkLabel(master = app, text = "Sélectionner le fichier à traiter")
+texte1.place(relx = 0.5, rely=0.3, anchor=CENTER)
+
+button = customtkinter.CTkButton(master = app, text='Sélectionner...', command=UploadAction)
+button.place(relx = 0.5, rely=0.5, anchor=CENTER)
+
+progressbar = customtkinter.CTkProgressBar(app, orientation="horizontal")
 
 
-
-
-
-
-
-
-button.pack()
-window.mainloop()
+app.mainloop()
 
