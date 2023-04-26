@@ -18,7 +18,7 @@ import csv
 import pandas as pd
 from pandastable import Table, TableModel, config
 
-from stats import moy, users
+from stats import moy, users, df
 
 
 import customtkinter
@@ -27,7 +27,7 @@ customtkinter.set_default_color_theme("green")  # Themes: "blue" (standard), "gr
 
 
 file_path = ""
-
+filter = "O5JB"
 
 
 main_window = MainWindow()
@@ -106,15 +106,30 @@ def loadWorkbook(file_path):
 #epingle la première ligne
     sheet.freeze_panes = "B2"
 
+    filter = StringVar()
+    filter.set(moy)
+    def optionmenu_callback(choice):
+        print("optionmenu dropdown clicked:", choice)
+        filtrage= df["UserID"] == choice
+        filter.set (str(df[filtrage]))
+
     workbook.save(filename= "test.xlsx")
     df = pd.DataFrame(pd.read_excel("test.xlsx"))
     buttonSelectionFichier.destroy()
+
+    
  
-    main_window.label_main = customtkinter.CTkLabel(main_window.main_frame, text= moy, font=customtkinter.CTkFont(size=10, weight="bold"))
+    main_window.label_main = customtkinter.CTkLabel(main_window.main_frame, textvariable= filter, font=customtkinter.CTkFont(size=10, weight="bold"))
     main_window.label_main.grid(row=3, column=1, padx=(10, 0), pady=(10, 0), sticky="nsew")
     
-    optionmenu_1 = customtkinter.CTkOptionMenu(master=main_window.main_frame, dynamic_resizing=False, values = users)
+ 
+
+
+    optionmenu_var = customtkinter.StringVar(value=users[1])
+
+    optionmenu_1 = customtkinter.CTkOptionMenu(master=main_window.main_frame, dynamic_resizing=False, values = users, command=optionmenu_callback, variable=optionmenu_var)
     optionmenu_1.grid(row=2, column=1, padx=20, pady=(20, 10))
+    
 
 
 def UploadAction():
