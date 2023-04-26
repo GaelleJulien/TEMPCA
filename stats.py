@@ -9,7 +9,8 @@ filter = df["UserID"] == "05JB"
 
 users = df["UserID"].drop_duplicates().to_list()
 
-moy = df.groupby("temperature")[["sleep_efficiency (%)", "actual_sleep (%)", "actual_wake (%)", "fragmentation_index"]].mean()
-moy = str(moy)
+moydf = df.groupby("temperature")[["sleep_efficiency (%)", "actual_sleep (%)", "actual_wake (%)", "fragmentation_index"]].mean()
+moy = str(moydf)
 
-print(df[filter])
+
+print(moydf)

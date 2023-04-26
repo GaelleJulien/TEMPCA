@@ -16,9 +16,10 @@ from tkinter import filedialog
 
 import csv
 import pandas as pd
+import pandastable as pt
 from pandastable import Table, TableModel, config
 
-from stats import moy, users, df
+from stats import moy, moydf, users, df
 
 
 import customtkinter
@@ -115,12 +116,17 @@ def loadWorkbook(file_path):
 
     workbook.save(filename= "test.xlsx")
     df = pd.DataFrame(pd.read_excel("test.xlsx"))
+
     buttonSelectionFichier.destroy()
 
     
  
     main_window.label_main = customtkinter.CTkLabel(main_window.main_frame, textvariable= filter, font=customtkinter.CTkFont(size=10, weight="bold"))
     main_window.label_main.grid(row=3, column=1, padx=(10, 0), pady=(10, 0), sticky="nsew")
+
+    dTDaPT = pt.Table(main_window.main_frame, dataframe=df)
+    dTDaPT.grid(row=1, column=1, padx=(10, 0), pady=(10, 0), sticky="nsew")
+    dTDaPT.show()
     
  
 
@@ -128,7 +134,7 @@ def loadWorkbook(file_path):
     optionmenu_var = customtkinter.StringVar(value=users[1])
 
     optionmenu_1 = customtkinter.CTkOptionMenu(master=main_window.main_frame, dynamic_resizing=False, values = users, command=optionmenu_callback, variable=optionmenu_var)
-    optionmenu_1.grid(row=2, column=1, padx=20, pady=(20, 10))
+    optionmenu_1.grid(row=4, column=1, padx=20, pady=(20, 10))
     
 
 
@@ -137,7 +143,7 @@ def UploadAction():
     if file_path is not None:
         print (file_path)
         loadWorkbook(file_path)
-        textSelectionFichier.set("bravooooo")
+        textSelectionFichier.set("Filtrage par sujet")
 
 textSelectionFichier = StringVar()
 textSelectionFichier.set("Sélectionner le fichier à traiter")
