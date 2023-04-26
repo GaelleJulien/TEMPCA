@@ -64,7 +64,7 @@ class App(customtkinter.CTk):
 
         self.optionmenu_1 = customtkinter.CTkOptionMenu(self.tabview.tab("CTkTabview"), dynamic_resizing=False,
                                                         values=["Value 1", "Value 2", "Value Long Long Long"])
-        self.optionmenu_1.grid(row=0, column=0, padx=20, pady=(20, 10))
+        self.optionmenu_1.grid(row=0, column=1, padx=20, pady=(20, 10))
         self.combobox_1 = customtkinter.CTkComboBox(self.tabview.tab("CTkTabview"),
                                                     values=["Value 1", "Value 2", "Value Long....."])
         self.combobox_1.grid(row=1, column=0, padx=20, pady=(10, 10))
