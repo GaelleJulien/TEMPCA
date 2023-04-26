@@ -6,7 +6,7 @@ from openpyxl.styles import PatternFill
 from openpyxl.styles import Font, Color, Alignment, Border, Side
 
 from classes import Stats
-from classes import ToplevelWindow
+from classes import ToplevelWindow, MainWindow
 from mapping import FRAGMENTATION_INDEX, SLEEP_LATENCY, ACTUAL_WAKE_TIME, SLEEP_EFFICIENCY, LIGHTS_OUT, GOT_UP, TIME_IN_BED, ASSUMED_SLEEP, ACTUAL_SLEEP_TIME
 from mapping import USERID, ACTUAL_SLEEP_RATE, ACTUAL_WAKE_RATE, FELL_ASLEEP, WOKE_UP
 
@@ -20,21 +20,23 @@ from pandastable import Table, TableModel, config
 
 
 import customtkinter
+customtkinter.set_appearance_mode("System")  # Modes: "System" (standard), "Dark", "Light"
+customtkinter.set_default_color_theme("green")  # Themes: "blue" (standard), "green", "dark-blue"
 
 
 file_path = ""
 
 
-class TestApp(Frame):
+class AffichageTable(Frame):
         """Basic test frame for the table"""
         def __init__(self, parent=None):
             self.parent = parent
             Frame.__init__(self)
             self.main = self.master
-            self.main.geometry('600x400+200+100')
-            self.main.title('Table app')
+            self.main.geometry(f"{1100}x{580}")
+            self.main.title('Stats')
             f = Frame(self.main)
-            f.pack(fill=BOTH,expand=1)
+            f.pack(fill=BOTH)
             self.table = pt = Table(f, dataframe= pd.DataFrame(pd.read_excel("test.xlsx")))
             pt.show()
             options = {'colheadercolor':'green','floatprecision': 5}
@@ -115,36 +117,27 @@ def loadWorkbook(file_path):
 
     workbook.save(filename= "test.xlsx")
     df = pd.DataFrame(pd.read_excel("test.xlsx"))
+    MainWindow.open_toplevel(main_window)
 
 def UploadAction():
     file_path = filedialog.askopenfilename()
     if file_path is not None:
         print (file_path)
         loadWorkbook(file_path)
-        
-
    
-def open_toplevel():
-    toplevel_window = TestApp(app)
-
- 
-
-app = customtkinter.CTk()
-app.geometry("500x200")
-app.title("Gaëlle reigne suprême parmi les mortels")
 
 
-texte1 = customtkinter.CTkLabel(master = app, text = "Sélectionner le fichier à traiter")
-texte1.place(relx = 0.5, rely=0.3, anchor=CENTER)
-
-button = customtkinter.CTkButton(master = app, text='Sélectionner...', command=UploadAction)
-button.place(relx = 0.5, rely=0.5, anchor=CENTER)
-
-button2 = customtkinter.CTkButton(master = app, text='Afficher les données', command=open_toplevel)
-button2.place(relx = 0.5, rely=0.7, anchor=CENTER)
-
-progressbar = customtkinter.CTkProgressBar(app, orientation="horizontal")
+main_window = MainWindow()
 
 
-app.mainloop()
+
+labelSelectionFichier = customtkinter.CTkLabel(master = main_window, text = "Sélectionner le fichier à traiter")
+labelSelectionFichier.place(relx = 0.5, rely=0.3, anchor=CENTER)
+
+buttonSelectionFichier = customtkinter.CTkButton(master = main_window, text='Sélectionner...', command=UploadAction)
+buttonSelectionFichier.place(relx = 0.5, rely=0.5, anchor=CENTER)
+
+
+
+main_window.mainloop()
 
