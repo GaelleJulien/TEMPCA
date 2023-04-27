@@ -110,9 +110,11 @@ def loadWorkbook(file_path):
     filter = StringVar()
     filter.set(moy)
     def optionmenu_callback(choice):
-        print("optionmenu dropdown clicked:", choice)
         filtrage= df["UserID"] == choice
         filter.set (str(df[filtrage]))
+        newdf = df[filtrage]
+        fillTable(newdf)
+        
 
     workbook.save(filename= "test.xlsx")
     df = pd.DataFrame(pd.read_excel("test.xlsx"))
@@ -141,35 +143,42 @@ def loadWorkbook(file_path):
                             fieldbackground="#343638",
                             bordercolor="#343638",
                             borderwidth=0)
-    style.map('Treeview', background=[('selected', '#22559b')])
+    style.map('Treeview', background=[('selected', '#565b5e')])
     
     style.configure("Treeview.Heading",
-                            background="#565b5e",
+                            background="#52a57c",
                             foreground="white",
                             relief="flat")
-    style.map("Treeview.Heading", background=[('active', '#3484F0')])
+    style.map("Treeview.Heading", background=[('active', '#52a57c')])
 
 
-    df_list=list(df)
-    df_rset=df.round(2).to_numpy().tolist()
 
-    df_tree = ttk.Treeview(main_window.tabView.tab("Prout"), columns=df_list)
-    df_tree["show"] = "headings"
-    df_tree.grid(row=1, column=1, padx=(10, 0), pady=(10, 0), sticky="nsew")
 
-    for i in df_list:
-        df_tree.column(i,width=75,anchor='c')
-        df_tree.heading(i,text=i)
-    for dt in df_rset:
-        v=[r for r in dt]
-        df_tree.insert('','end', values=v)
+    def fillTable(newdf):
+        
+        df_list=list(df)
+        df_rset=newdf.round(2).to_numpy().tolist()
+
+        df_tree = ttk.Treeview(main_window.tabView.tab("Prout"), columns=df_list)
+        for i in df_tree.get_children():
+            df_tree.delete(i)
+        df_tree["show"] = "headings"
+        df_tree.grid(row=1, column=1, padx=(10, 0), pady=(10, 0), sticky="nsew")
+
+        for i in df_list:
+            df_tree.column(i,width=75,anchor='c')
+            df_tree.heading(i,text=i)
+        for dt in df_rset:
+            v=[r for r in dt]
+            df_tree.insert('','end', values=v)
     
+    fillTable(df)
 
 
     optionmenu_var = customtkinter.StringVar(value=users[1])
 
-    optionmenu_1 = customtkinter.CTkOptionMenu(master=main_window.tabView.tab("Tab 2"), dynamic_resizing=False, values = users, command=optionmenu_callback, variable=optionmenu_var)
-    optionmenu_1.grid(row=4, column=1, padx=20, pady=(20, 10))
+    optionmenu_1 = customtkinter.CTkOptionMenu(master=main_window.tabView.tab("Prout"), dynamic_resizing=False, values = users, command=optionmenu_callback, variable=optionmenu_var)
+    optionmenu_1.place(relx=.5, rely=.9, anchor="center")
     
 
 

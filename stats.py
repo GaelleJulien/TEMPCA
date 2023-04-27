@@ -7,7 +7,7 @@ df = pd.DataFrame(pd.read_excel("test.xlsx"))
 
 df_num = df.select_dtypes(include=["float"]).columns
 
-filter = df["UserID"] == "05JB"
+#filter = df["UserID"] == "05JB"
 
 users = df["UserID"].drop_duplicates().to_list()
 
