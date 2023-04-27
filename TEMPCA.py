@@ -124,7 +124,7 @@ def loadWorkbook(file_path):
     
  
     main_window.label_main = customtkinter.CTkLabel(main_window.tabView.tab("Prout"), textvariable= filter, font=customtkinter.CTkFont(size=10, weight="bold"))
-    main_window.label_main.grid(row=3, column=1, padx=(10, 0), pady=(10, 0), sticky="nsew")
+    main_window.label_main.place(relx=.5, rely=.7, anchor="center")
 
     #dTDaPT = pt.Table(main_window.main_frame, dataframe=df)
     #dTDaPT.grid(row=1, column=1, padx=(10, 0), pady=(10, 0), sticky="nsew")
@@ -163,7 +163,7 @@ def loadWorkbook(file_path):
         for i in df_tree.get_children():
             df_tree.delete(i)
         df_tree["show"] = "headings"
-        df_tree.grid(row=1, column=1, padx=(10, 0), pady=(10, 0), sticky="nsew")
+        df_tree.place(relx=.5, rely=.35, anchor="center")
 
         for i in df_list:
             df_tree.column(i,width=75,anchor='c')
@@ -178,7 +178,7 @@ def loadWorkbook(file_path):
     optionmenu_var = customtkinter.StringVar(value=users[1])
 
     optionmenu_1 = customtkinter.CTkOptionMenu(master=main_window.tabView.tab("Prout"), dynamic_resizing=False, values = users, command=optionmenu_callback, variable=optionmenu_var)
-    optionmenu_1.place(relx=.5, rely=.9, anchor="center")
+    optionmenu_1.place(relx=.5, rely=.075, anchor="center")
     
 
 
