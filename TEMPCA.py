@@ -49,10 +49,10 @@ def loadWorkbook(file_path):
         temperaure = int(sheet.title[-2:])
 
     #remplissage de la classe
-        stat = Stats(id = sheet[USERID].value, temp = temperaure, assumed_sleep=sheet[ASSUMED_SLEEP].value, actual_sleep_time= sheet[ACTUAL_SLEEP_TIME].value, 
+        stat = Stats(id = sheet[USERID].value, TEMP = temperaure, SPT=sheet[ASSUMED_SLEEP].value, TST= sheet[ACTUAL_SLEEP_TIME].value, 
                  actual_sleep_rate = sheet[ACTUAL_SLEEP_RATE].value, actual_wake_time=sheet[ACTUAL_WAKE_TIME].value, actual_wake_rate = sheet[ACTUAL_WAKE_RATE].value, 
-                 time_in_bed=sheet[TIME_IN_BED].value, sleep_efficiency=sheet[SLEEP_EFFICIENCY].value,lights_out=sheet[LIGHTS_OUT].value, fell_asleep=sheet[FELL_ASLEEP].value, 
-                 sleep_latency=sheet[SLEEP_LATENCY].value ,woke_up=sheet[WOKE_UP].value, got_up=sheet[GOT_UP].value, fragmentation_index=sheet[FRAGMENTATION_INDEX].value)
+                 TIB=sheet[TIME_IN_BED].value, sleep_efficiency=sheet[SLEEP_EFFICIENCY].value,lights_out=sheet[LIGHTS_OUT].value, fell_asleep=sheet[FELL_ASLEEP].value, 
+                 sleep_latency=sheet[SLEEP_LATENCY].value ,woke_up=sheet[WOKE_UP].value, got_up=sheet[GOT_UP].value, SFI=sheet[FRAGMENTATION_INDEX].value)
     
         stats.append(stat)
       
@@ -62,13 +62,13 @@ def loadWorkbook(file_path):
     sheet = workbook.active
 
 #nom des en-têtes
-    sheet.append(["UserID", "temperature", "time_in_bed", "assumed_sleep", "actual_sleep_time", "actual_sleep (%)", "actual_wake_time", "actual_wake (%)", "sleep_efficiency (%)", "lights_out", 
-              "fell_asleep", "sleep_latency", "woke_up", "got_up", "fragmentation_index"])
+    sheet.append(["UserID", "TEMP", "TIB", "SPT", "TST", "actual_sleep (%)", "actual_wake_time", "actual_wake (%)", "sleep_efficiency (%)", "lights_out", 
+              "fell_asleep", "sleep_latency", "woke_up", "got_up", "SFI"])
 
 #remplissage du tableau
     for stat in stats : 
-        data = [stat.id, stat.temp, stat.time_in_bed, stat.assumed_sleep, stat.actual_sleep_time, stat.actual_sleep_rate, stat.actual_wake_time, stat.actual_wake_rate,stat.sleep_efficiency,
-            stat.lights_out, stat.fell_asleep, stat.sleep_latency, stat.woke_up, stat.got_up, stat.fragmentation_index]
+        data = [stat.id, stat.TEMP, stat.TIB, stat.SPT, stat.TST, stat.actual_sleep_rate, stat.actual_wake_time, stat.actual_wake_rate,stat.sleep_efficiency,
+            stat.lights_out, stat.fell_asleep, stat.sleep_latency, stat.woke_up, stat.got_up, stat.SFI]
         sheet.append(data)
 
 
@@ -121,7 +121,7 @@ def loadWorkbook(file_path):
 
     
  
-    main_window.label_main = customtkinter.CTkLabel(main_window.main_frame, textvariable= filter, font=customtkinter.CTkFont(size=10, weight="bold"))
+    main_window.label_main = customtkinter.CTkLabel(main_window.tabView.tab("Prout"), textvariable= filter, font=customtkinter.CTkFont(size=10, weight="bold"))
     main_window.label_main.grid(row=3, column=1, padx=(10, 0), pady=(10, 0), sticky="nsew")
 
     #dTDaPT = pt.Table(main_window.main_frame, dataframe=df)
@@ -149,27 +149,26 @@ def loadWorkbook(file_path):
                             relief="flat")
     style.map("Treeview.Heading", background=[('active', '#3484F0')])
 
-    
-    df_list=list(df.columns.values)
-    df_rset=df.to_numpy().tolist()
 
-    df_tree = ttk.Treeview(main_window.main_frame, columns=df_list)
+    df_list=list(df)
+    df_rset=df.round(2).to_numpy().tolist()
+
+    df_tree = ttk.Treeview(main_window.tabView.tab("Prout"), columns=df_list)
     df_tree["show"] = "headings"
     df_tree.grid(row=1, column=1, padx=(10, 0), pady=(10, 0), sticky="nsew")
 
     for i in df_list:
-        df_tree.column(i,width=50,anchor='c')
+        df_tree.column(i,width=75,anchor='c')
         df_tree.heading(i,text=i)
     for dt in df_rset:
         v=[r for r in dt]
-        df_tree.insert('','end',iid=v[0], values=v)
-    
+        df_tree.insert('','end', values=v)
     
 
 
     optionmenu_var = customtkinter.StringVar(value=users[1])
 
-    optionmenu_1 = customtkinter.CTkOptionMenu(master=main_window.main_frame, dynamic_resizing=False, values = users, command=optionmenu_callback, variable=optionmenu_var)
+    optionmenu_1 = customtkinter.CTkOptionMenu(master=main_window.tabView.tab("Tab 2"), dynamic_resizing=False, values = users, command=optionmenu_callback, variable=optionmenu_var)
     optionmenu_1.grid(row=4, column=1, padx=20, pady=(20, 10))
     
 
@@ -183,11 +182,10 @@ def UploadAction():
 
 textSelectionFichier = StringVar()
 textSelectionFichier.set("Sélectionner le fichier à traiter")
-main_window.labelSelectionFichier = customtkinter.CTkLabel(master = main_window.main_frame, textvariable = textSelectionFichier, font=customtkinter.CTkFont(size=20, weight="bold"))
-main_window.labelSelectionFichier.grid(row=0, column=1, padx=(10, 0), pady=(10, 0), sticky="nsew")
-
-buttonSelectionFichier = customtkinter.CTkButton(master = main_window.main_frame, text='Sélectionner...', command=UploadAction)
-buttonSelectionFichier.grid(row=1, column=1, padx=20, pady=20)
+main_window.labelSelectionFichier = customtkinter.CTkLabel(master = main_window.tabView.tab("Prout"), textvariable = textSelectionFichier, font=customtkinter.CTkFont(size=40, weight="bold"))
+main_window.labelSelectionFichier.place(relx=.5, rely=.3, anchor="center")
+buttonSelectionFichier = customtkinter.CTkButton(master = main_window.tabView.tab("Prout"), text='Sélectionner...', command=UploadAction, width=200, height=50, font=customtkinter.CTkFont(size=20))
+buttonSelectionFichier.place(relx=.5, rely=.6, anchor="center")
 
 
 

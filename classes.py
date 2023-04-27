@@ -12,10 +12,10 @@ import customtkinter
 @dataclass
 class Stats :
     id : str
-    temp : int
-    time_in_bed : datetime
-    assumed_sleep : datetime
-    actual_sleep_time : datetime
+    TEMP : int
+    TIB : datetime
+    SPT : datetime
+    TST : datetime
     actual_sleep_rate : float
     actual_wake_time : datetime
     actual_wake_rate : float
@@ -25,7 +25,7 @@ class Stats :
     sleep_latency : datetime
     woke_up : datetime
     got_up : datetime
-    fragmentation_index : float
+    SFI : float
 
 
 
@@ -79,9 +79,11 @@ class MainWindow(customtkinter.CTk) :
 
         self.toplevel_window = None
 
-        self.main_frame = customtkinter.CTkFrame(self, width=600, corner_radius=0)
-        self.main_frame.grid(row=0, column=1, rowspan=4, sticky="nsew")
-        self.main_frame.grid_rowconfigure(4, weight=1)
+        self.tabView = customtkinter.CTkTabview(self, width=600, corner_radius=0,)
+        self.tabView.grid(row=0, column=1, padx=(20, 20), pady=(20, 0), sticky="nsew")
+        self.tabView.add("Prout")
+        self.tabView.add("Tab 2")
+        self.tabView.add("Tab 3")
 
 
 
