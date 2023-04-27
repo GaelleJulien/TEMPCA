@@ -12,7 +12,7 @@ from mapping import USERID, ACTUAL_SLEEP_RATE, ACTUAL_WAKE_RATE, FELL_ASLEEP, WO
 
 import tkinter as tk
 from tkinter import *
-from tkinter import filedialog
+from tkinter import filedialog, ttk
 
 import csv
 import pandas as pd
@@ -124,11 +124,47 @@ def loadWorkbook(file_path):
     main_window.label_main = customtkinter.CTkLabel(main_window.main_frame, textvariable= filter, font=customtkinter.CTkFont(size=10, weight="bold"))
     main_window.label_main.grid(row=3, column=1, padx=(10, 0), pady=(10, 0), sticky="nsew")
 
-    dTDaPT = pt.Table(main_window.main_frame, dataframe=df)
-    dTDaPT.grid(row=1, column=1, padx=(10, 0), pady=(10, 0), sticky="nsew")
-    dTDaPT.show()
+    #dTDaPT = pt.Table(main_window.main_frame, dataframe=df)
+    #dTDaPT.grid(row=1, column=1, padx=(10, 0), pady=(10, 0), sticky="nsew")
+    #dTDaPT.show()
+
+
+
+    style = ttk.Style()
     
- 
+    style.theme_use("default")
+    
+    style.configure("Treeview",
+                            background="#2a2d2e",
+                            foreground="white",
+                            rowheight=25,
+                            fieldbackground="#343638",
+                            bordercolor="#343638",
+                            borderwidth=0)
+    style.map('Treeview', background=[('selected', '#22559b')])
+    
+    style.configure("Treeview.Heading",
+                            background="#565b5e",
+                            foreground="white",
+                            relief="flat")
+    style.map("Treeview.Heading", background=[('active', '#3484F0')])
+
+    
+    df_list=list(df.columns.values)
+    df_rset=df.to_numpy().tolist()
+
+    df_tree = ttk.Treeview(main_window.main_frame, columns=df_list)
+    df_tree["show"] = "headings"
+    df_tree.grid(row=1, column=1, padx=(10, 0), pady=(10, 0), sticky="nsew")
+
+    for i in df_list:
+        df_tree.column(i,width=50,anchor='c')
+        df_tree.heading(i,text=i)
+    for dt in df_rset:
+        v=[r for r in dt]
+        df_tree.insert('','end',iid=v[0], values=v)
+    
+    
 
 
     optionmenu_var = customtkinter.StringVar(value=users[1])
