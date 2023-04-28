@@ -19,7 +19,7 @@ import pandas as pd
 import pandastable as pt
 from pandastable import Table, TableModel, config
 
-from stats import moy, moydf, users, df
+from stats import moy, moydf, users, df, temp
 
 
 import customtkinter
@@ -29,6 +29,7 @@ customtkinter.set_default_color_theme("green")  # Themes: "blue" (standard), "gr
 
 file_path = ""
 filter = "O5JB"
+filter2 = "24"
 
 
 main_window = MainWindow()
@@ -46,7 +47,7 @@ def loadWorkbook(file_path):
 
     #les titres des feuilles sont au format USERID_TEMP (c'est moi qui l'ai décidé nah)
     #  --> n'ayant pas de vraibale température sur MotionWare on récupère la température de la nuit à partir du nom de la feuille
-        temperaure = int(sheet.title[-2:])
+        temperaure = str(sheet.title[-2:])
 
     #remplissage de la classe
         stat = Stats(id = sheet[USERID].value, TEMP = temperaure, SPT=sheet[ASSUMED_SLEEP].value, TST= sheet[ACTUAL_SLEEP_TIME].value, 
@@ -109,26 +110,26 @@ def loadWorkbook(file_path):
 
     filter = StringVar()
     filter.set(moy)
-    def optionmenu_callback(choice):
+
+    def optionmenu_user_callback(choice):
         filtrage= df["UserID"] == choice
         filter.set (str(df[filtrage]))
         newdf = df[filtrage]
         fillTable(newdf)
         
+    
+    def optionmenu_temp_callback(choice):
+        filtrage= df["TEMP"] == choice
+        filter.set (str(df[filtrage]))
+        newdf = df[filtrage]
+        fillTable(newdf)
+
 
     workbook.save(filename= "test.xlsx")
     df = pd.DataFrame(pd.read_excel("test.xlsx"))
 
     buttonSelectionFichier.destroy()
 
-    
- 
-    main_window.label_main = customtkinter.CTkLabel(main_window.tabView.tab("Prout"), textvariable= filter, font=customtkinter.CTkFont(size=10, weight="bold"))
-    main_window.label_main.place(relx=.5, rely=.7, anchor="center")
-
-    #dTDaPT = pt.Table(main_window.main_frame, dataframe=df)
-    #dTDaPT.grid(row=1, column=1, padx=(10, 0), pady=(10, 0), sticky="nsew")
-    #dTDaPT.show()
 
 
 
@@ -175,12 +176,21 @@ def loadWorkbook(file_path):
     fillTable(df)
 
 
-    optionmenu_var = customtkinter.StringVar(value=users[1])
+    optionmenu1_var = customtkinter.StringVar(value=users[1])
+    optionmenu2_var = customtkinter.StringVar(value=temp[1])
 
-    optionmenu_1 = customtkinter.CTkOptionMenu(master=main_window.tabView.tab("Prout"), dynamic_resizing=False, values = users, command=optionmenu_callback, variable=optionmenu_var)
-    optionmenu_1.place(relx=.5, rely=.075, anchor="center")
+    optionmenu_user = customtkinter.CTkOptionMenu(master=main_window.tabView.tab("Prout"), dynamic_resizing=False, values = users, command=optionmenu_user_callback, variable=optionmenu1_var)
+    optionmenu_user.place(relx=0.1, rely=.075, anchor="center")
+    optionmenu_2 = customtkinter.CTkOptionMenu(master=main_window.tabView.tab("Prout"), dynamic_resizing=False, values = temp, command=optionmenu_temp_callback, variable=optionmenu2_var)
+    optionmenu_2.place(relx=.5, rely=.075, anchor="center")
+    optionmenu_2 = customtkinter.CTkOptionMenu(master=main_window.tabView.tab("Prout"), dynamic_resizing=False, values = users, command=optionmenu_user_callback, variable=optionmenu1_var)
+    optionmenu_2.place(relx=0.9, rely=.075, anchor="center")
     
 
+    
+ 
+    main_window.label_stats = customtkinter.CTkLabel(main_window.tabView.tab("Prout"), textvariable= filter, font=customtkinter.CTkFont(size=10, weight="bold"))
+    main_window.label_stats.place(relx=.5, rely=.7, anchor="center")
 
 def UploadAction():
     file_path = filedialog.askopenfilename()
