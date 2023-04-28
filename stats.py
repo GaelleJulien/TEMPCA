@@ -10,7 +10,6 @@ df_num = df.select_dtypes(include=["float"]).columns
 #filter = df["UserID"] == "05JB"
 
 df = df.astype({"TEMP" : str})
-print(df["TEMP"]) 
 users = (df["UserID"].drop_duplicates().to_list())
 temp = df["TEMP"].drop_duplicates().to_list()
 
