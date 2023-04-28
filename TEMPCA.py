@@ -113,18 +113,20 @@ def loadWorkbook(file_path):
 
     def optionmenu_user_callback(choice):
         filtrage= df["UserID"] == choice
-        print(filtrage)
-        filter.set (str(df[filtrage]))
-        newdf = df[filtrage]
+        if(choice == "TOUS"):
+            newdf = df
+        else : 
+            newdf = df[filtrage]
         fillTable(newdf)
-        print(newdf)
         
     
     def optionmenu_temp_callback(choice):
         filtrage= (df["TEMP"].astype('string') == choice)
-        filter.set (df.loc[df["TEMP"] == "16"])
-        newdf = df[filtrage]
-        print(df[filtrage])
+        filter.set (df.loc[df["TEMP"].astype('string') == "16"])
+        if(choice == "TOUS"):
+            newdf = df
+        else : 
+            newdf = df[filtrage]
         fillTable(newdf)
 
 
@@ -179,7 +181,7 @@ def loadWorkbook(file_path):
     fillTable(df)
 
 
-    optionmenu1_var = customtkinter.StringVar(value=users[1])
+    optionmenu1_var = customtkinter.StringVar(value=users[0])
     optionmenu2_var = customtkinter.StringVar(value=temp[0])
 
     optionmenu_user = customtkinter.CTkOptionMenu(master=main_window.tabView.tab("Prout"), dynamic_resizing=False, values = users, command=optionmenu_user_callback, variable=optionmenu1_var)
