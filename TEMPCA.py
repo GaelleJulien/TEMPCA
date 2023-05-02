@@ -113,7 +113,7 @@ def loadWorkbook(file_path):
 
     def optionmenu_user_callback(choice):
         filtrage= df["UserID"] == choice
-        if(choice == "TOUS"):
+        if(choice == users[0]):
             newdf = df
         else : 
             newdf = df[filtrage]
@@ -123,12 +123,20 @@ def loadWorkbook(file_path):
     def optionmenu_temp_callback(choice):
         filtrage= (df["TEMP"].astype('string') == choice)
         filter.set (df.loc[df["TEMP"].astype('string') == "16"])
-        if(choice == "TOUS"):
+        if(choice == temp[0]):
             newdf = df
         else : 
             newdf = df[filtrage]
         fillTable(newdf)
 
+    def checkbox_user_callback():
+        print(checkbox_var.get())
+        filtrage= df["UserID"] == checkbox_var.get()
+        if checkbox_var.get() == 0 :
+            newdf = df
+        else : 
+            newdf = df[filtrage]
+        fillTable(newdf)
 
     workbook.save(filename= "test.xlsx")
     df = pd.DataFrame(pd.read_excel("test.xlsx"))
@@ -169,7 +177,7 @@ def loadWorkbook(file_path):
         for i in df_tree.get_children():
             df_tree.delete(i)
         df_tree["show"] = "headings"
-        df_tree.place(relx=.5, rely=.35, anchor="center")
+        df_tree.place(relx=.5, rely=.6, anchor="center")
 
         for i in df_list:
             df_tree.column(i,width=75,anchor='c')
@@ -180,22 +188,44 @@ def loadWorkbook(file_path):
     
     fillTable(df)
 
-
     optionmenu1_var = customtkinter.StringVar(value=users[0])
     optionmenu2_var = customtkinter.StringVar(value=temp[0])
 
     optionmenu_user = customtkinter.CTkOptionMenu(master=main_window.tabView.tab("Prout"), dynamic_resizing=False, values = users, command=optionmenu_user_callback, variable=optionmenu1_var)
-    optionmenu_user.place(relx=0.1, rely=.075, anchor="center")
+    optionmenu_user.grid(row=1, column=1, padx=(125, 125), pady=(20, 20), sticky="nsew")
     optionmenu_2 = customtkinter.CTkOptionMenu(master=main_window.tabView.tab("Prout"), dynamic_resizing=False, values = temp, command=optionmenu_temp_callback, variable=optionmenu2_var)
-    optionmenu_2.place(relx=.5, rely=.075, anchor="center")
+    optionmenu_2.grid(row=1, column=10,  padx=(125, 125), pady=(20, 20), sticky="nsew")
     optionmenu_2 = customtkinter.CTkOptionMenu(master=main_window.tabView.tab("Prout"), dynamic_resizing=False, values = users, command=optionmenu_user_callback, variable=optionmenu1_var)
-    optionmenu_2.place(relx=0.9, rely=.075, anchor="center")
+    optionmenu_2.grid(row=1, column=19,  padx=(125, 125), pady=(20, 20), sticky="nsew")
+   
+
+  
+
+    checkbox_var = customtkinter.StringVar(value=users[0])
+
+    checkbox_frame = customtkinter.CTkScrollableFrame(main_window)
+    checkbox_frame.grid(row=3, column=1, rowspan = 3, padx=(20, 20), pady=(10, 10), sticky="nsew")
+    i = 0
+    for user in users [1:] : 
+        checkbox = customtkinter.CTkCheckBox(master=checkbox_frame, text=user, variable=checkbox_var, offvalue = 0, onvalue = user, command=checkbox_user_callback)
+        checkbox.grid(row=i +1, column=1, padx=(20, 20), pady=(10, 10), sticky="nsew")
+        i = i+1
+    
+
+    # radio_var = tk.IntVar(value=0)
+    # label_radio_group = customtkinter.CTkLabel(master=checkbox_frame, text="CTkRadioButton Group:")
+    # checkbox_1 = customtkinter.CTkCheckBox(master=checkbox_frame)
+    # checkbox_1.grid(row=1, column=0, pady=(20, 0), padx=20, sticky="n")
+    # checkbox_2 = customtkinter.CTkCheckBox(master=checkbox_frame)
+    # checkbox_2.grid(row=2, column=0, pady=(20, 0), padx=20, sticky="n")
+    # checkbox_3 = customtkinter.CTkCheckBox(master=checkbox_frame)
+    # checkbox_3.grid(row=3, column=0, pady=20, padx=20, sticky="n")
     
 
     
  
-    main_window.label_stats = customtkinter.CTkLabel(main_window.tabView.tab("Prout"), textvariable= filter, font=customtkinter.CTkFont(size=10, weight="bold"))
-    main_window.label_stats.place(relx=.5, rely=.7, anchor="center")
+    #main_window.label_stats = customtkinter.CTkLabel(main_window.tabView.tab("Prout"), textvariable= filter, font=customtkinter.CTkFont(size=10, weight="bold"))
+    #main_window.label_stats.place(relx=.5, rely=.7, anchor="center")
 
 def UploadAction():
     file_path = filedialog.askopenfilename()

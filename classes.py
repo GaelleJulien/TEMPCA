@@ -51,7 +51,7 @@ class MainWindow(customtkinter.CTk) :
 
         self.grid_columnconfigure(1, weight=1)
         self.grid_columnconfigure((2, 3), weight=0)
-        self.grid_rowconfigure((0, 1, 2), weight=1)
+        self.grid_rowconfigure((0, 1, 2, 3), weight=1)
 
 
         
@@ -60,7 +60,7 @@ class MainWindow(customtkinter.CTk) :
         self.labelSelectionFichier.place(relx = 0.5, rely=0.3, anchor=CENTER)
         # create sidebar frame with widgets
         self.sidebar_frame = customtkinter.CTkFrame(self, width=140, corner_radius=0)
-        self.sidebar_frame.grid(row=0, column=0, rowspan=4, sticky="nsew")
+        self.sidebar_frame.grid(row=0, column=0, rowspan=5, sticky="nsew")
         self.sidebar_frame.grid_rowconfigure(4, weight=1)
         self.logo_label = customtkinter.CTkLabel(self.sidebar_frame, text="MENU", font=customtkinter.CTkFont(size=20, weight="bold"))
         self.logo_label.grid(row=0, column=0, padx=20, pady=(20, 10))
@@ -80,7 +80,7 @@ class MainWindow(customtkinter.CTk) :
         self.toplevel_window = None
 
         self.tabView = customtkinter.CTkTabview(self, width=1200, corner_radius=0,)
-        self.tabView.grid(row=0, column=1, rowspan = 4,padx=(20, 20), pady=(20, 20), sticky="nsew")
+        self.tabView.grid(row=0, column=1, rowspan = 3, padx=(20, 20), pady=(10, 10), sticky="nsew")
         self.tabView.add("Prout")
         self.tabView.add("Tab 2")
         self.tabView.add("Tab 3")
