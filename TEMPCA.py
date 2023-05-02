@@ -40,6 +40,8 @@ def loadWorkbook(file_path):
     workbook2 = load_workbook(filename = file_path, read_only=True)
     workbook2.sheetnames
     stats = []
+    selected_users=[]
+
 
 
     #parcours des feuilles
@@ -129,13 +131,19 @@ def loadWorkbook(file_path):
             newdf = df[filtrage]
         fillTable(newdf)
 
+
+
     def checkbox_user_callback():
         print(checkbox_var.get())
-        filtrage= df["UserID"] == checkbox_var.get()
-        if checkbox_var.get() == 0 :
+        if(checkbox_var.get() == users[0]):
+            selected_users.clear()
             newdf = df
         else : 
+            selected_users.append(checkbox_var.get())
+            print(selected_users)
+            filtrage= df["UserID"].isin(selected_users)
             newdf = df[filtrage]
+
         fillTable(newdf)
 
     workbook.save(filename= "test.xlsx")
@@ -207,7 +215,7 @@ def loadWorkbook(file_path):
     checkbox_frame.grid(row=3, column=1, rowspan = 3, padx=(20, 20), pady=(10, 10), sticky="nsew")
     i = 0
     for user in users [1:] : 
-        checkbox = customtkinter.CTkCheckBox(master=checkbox_frame, text=user, variable=checkbox_var, offvalue = 0, onvalue = user, command=checkbox_user_callback)
+        checkbox = customtkinter.CTkCheckBox(master=checkbox_frame, text=user, variable=checkbox_var, offvalue = users[0], onvalue = user, command=checkbox_user_callback)
         checkbox.grid(row=i +1, column=1, padx=(20, 20), pady=(10, 10), sticky="nsew")
         i = i+1
     
