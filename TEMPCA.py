@@ -3,6 +3,7 @@ from openpyxl import Workbook
 from openpyxl import load_workbook
 from openpyxl.formatting.rule import ColorScaleRule
 from openpyxl.styles import PatternFill
+from openpyxl.chart import Reference, LineChart
 from openpyxl.styles import Font, Color, Alignment, Border, Side
 
 from classes import Stats
@@ -21,6 +22,9 @@ from pandastable import Table, TableModel, config
 
 from stats import moy, moydf, users, df, temp
 
+from PIL import ImageTk, Image
+
+
 
 import customtkinter
 customtkinter.set_appearance_mode("System")  # Modes: "System" (standard), "Dark", "Light"
@@ -37,45 +41,55 @@ main_window = MainWindow()
         
 
 def loadWorkbook(file_path):
-    workbook2 = load_workbook(filename = file_path, read_only=True)
+    workbook2 = load_workbook(filename = file_path)
     workbook2.sheetnames
     stats = []
     selected_users=[]
+    selected_temps=[]
 
+    activity = []
 
 
     #parcours des feuilles
     for sheet in workbook2 : 
+    
+        activity.clear()
 
-    #les titres des feuilles sont au format USERID_TEMP (c'est moi qui l'ai décidé nah)
-    #  --> n'ayant pas de vraibale température sur MotionWare on récupère la température de la nuit à partir du nom de la feuille
+        
+        #les titres des feuilles sont au format USERID_TEMP (c'est moi qui l'ai décidé nah)
+        #  --> n'ayant pas de vraibale température sur MotionWare on récupère la température de la nuit à partir du nom de la feuille
         temperaure = str(sheet.title[-2:])
-
-    #remplissage de la classe
+            #remplissage de la classe
         stat = Stats(id = sheet[USERID].value, TEMP = temperaure, SPT=sheet[ASSUMED_SLEEP].value, TST= sheet[ACTUAL_SLEEP_TIME].value, 
                  actual_sleep_rate = sheet[ACTUAL_SLEEP_RATE].value, actual_wake_time=sheet[ACTUAL_WAKE_TIME].value, actual_wake_rate = sheet[ACTUAL_WAKE_RATE].value, 
                  TIB=sheet[TIME_IN_BED].value, sleep_efficiency=sheet[SLEEP_EFFICIENCY].value,lights_out=sheet[LIGHTS_OUT].value, fell_asleep=sheet[FELL_ASLEEP].value, 
                  sleep_latency=sheet[SLEEP_LATENCY].value ,woke_up=sheet[WOKE_UP].value, got_up=sheet[GOT_UP].value, SFI=sheet[FRAGMENTATION_INDEX].value)
     
         stats.append(stat)
-      
-    #print(stats)
+
+
+    sheet = workbook2.active
+
+    values = Reference(sheet, min_col=2, min_row=19, max_col=2, max_row=1039)
+    x_values = Reference(sheet, range_string="chart!A20:A1039")
 
     workbook = Workbook()
     sheet = workbook.active
 
-#nom des en-têtes
+   
+
+    #nom des en-têtes
     sheet.append(["UserID", "TEMP", "TIB", "SPT", "TST", "actual_sleep (%)", "actual_wake_time", "actual_wake (%)", "sleep_efficiency (%)", "lights_out", 
               "fell_asleep", "sleep_latency", "woke_up", "got_up", "SFI"])
 
-#remplissage du tableau
+    #remplissage du tableau
     for stat in stats : 
         data = [stat.id, stat.TEMP, stat.TIB, stat.SPT, stat.TST, stat.actual_sleep_rate, stat.actual_wake_time, stat.actual_wake_rate,stat.sleep_efficiency,
             stat.lights_out, stat.fell_asleep, stat.sleep_latency, stat.woke_up, stat.got_up, stat.SFI]
         sheet.append(data)
 
 
-#Ajustement de la largeur de la colonne en fonction de son contenu
+    #Ajustement de la largeur de la colonne en fonction de son contenu
     dims = {}
     for row in sheet.rows:
         for cell in row:
@@ -84,14 +98,14 @@ def loadWorkbook(file_path):
     for col, value in dims.items():
         sheet.column_dimensions[col].width = value
 
-#remplissage de ligne alternatif
+    #remplissage de ligne alternatif
     gris = "e2e2e2"
     for rows in sheet.iter_rows(min_row=2, max_row=69, min_col=1, max_col=15):
         for cell in rows:
             if cell.row % 2:
                 cell.fill = PatternFill(start_color=gris, end_color=gris,fill_type = "solid")
 
-#code couleur pour la température
+    #code couleur pour la température
     color_scale_rule = ColorScaleRule(end_type="num",
                                   end_value=32,
                                   end_color="e67d59",  # Rouge
@@ -104,10 +118,10 @@ def loadWorkbook(file_path):
     sheet.conditional_formatting.add("B2:B69", color_scale_rule)
 
 
-#filtres
+    #filtres
     sheet.auto_filter.ref = sheet.dimensions
 
-#epingle la première ligne
+    #epingle la première ligne
     sheet.freeze_panes = "B2"
 
     filter = StringVar()
@@ -134,14 +148,29 @@ def loadWorkbook(file_path):
 
 
     def checkbox_user_callback():
-        print(checkbox_var.get())
-        if(checkbox_var.get() == users[0]):
+        print(checkbox_var_users.get())
+        if(checkbox_var_users.get() == users[0]):
             selected_users.clear()
             newdf = df
         else : 
-            selected_users.append(checkbox_var.get())
+            selected_users.append(checkbox_var_users.get())
             print(selected_users)
             filtrage= df["UserID"].isin(selected_users)
+            newdf = df[filtrage]
+
+        fillTable(newdf)
+
+
+
+    def checkbox_temp_callback():
+        print(checkbox_var_temp.get())
+        if(checkbox_var_temp.get() == temp[0]):
+            selected_temps.clear()
+            newdf = df
+        else : 
+            selected_temps.append(checkbox_var_temp.get())
+            print(selected_temps)
+            filtrage= df["TEMP"].astype(str).isin(selected_temps)
             newdf = df[filtrage]
 
         fillTable(newdf)
@@ -207,21 +236,36 @@ def loadWorkbook(file_path):
     optionmenu_2.grid(row=1, column=19,  padx=(125, 125), pady=(20, 20), sticky="nsew")
    
 
-  
+    # meansPlot = PhotoImage(file = "testPlot.png")
+    # Label(master=main_window.tabView.tab("Tab 2"),image=meansPlot).grid(row=1, column=1,  padx=(20, 20), pady=(10, 10), sticky="nsew")
+    zoom = 0.8
 
-    checkbox_var = customtkinter.StringVar(value=users[0])
+
+    img = Image.open("testPlot.png")
+    #multiple image size by zoom
+    pixels_x, pixels_y = tuple([int(zoom * x)  for x in img.size])
+    
+    img = ImageTk.PhotoImage(img.resize((pixels_x, pixels_y)))
+    panel = Label(main_window.tabView.tab("Tab 2"), image = img)
+    panel.photo = img
+    panel.grid(column=1, row=1, padx=(20, 20), pady=(10, 10), sticky="nsew")
+
+    checkbox_var_users = customtkinter.StringVar(value=users[0])
 
     checkbox_frame = customtkinter.CTkScrollableFrame(main_window)
-    checkbox_frame.grid(row=3, column=1, rowspan = 3, padx=(20, 20), pady=(10, 10), sticky="nsew")
-    i = 0
+    checkbox_frame.grid(row=3, column=1, padx=(20, 20), pady=(10, 10), sticky="nsew")
+    checkbox_frame.grid_columnconfigure(1, weight=1)
+    titre_checkbox = customtkinter.CTkLabel(master=checkbox_frame, text="Filtrer par user(s) : ", font=customtkinter.CTkFont(size=20))
+    titre_checkbox.grid(row=1, column=1,  padx=(20, 20), pady=(10, 10), sticky="nsew")
+
+    i = 1
     for user in users [1:] : 
-        checkbox = customtkinter.CTkCheckBox(master=checkbox_frame, text=user, variable=checkbox_var, offvalue = users[0], onvalue = user, command=checkbox_user_callback)
+        checkbox = customtkinter.CTkCheckBox(master=checkbox_frame, text=user, variable=checkbox_var_users, offvalue = users[0], onvalue = user, command=checkbox_user_callback)
         checkbox.grid(row=i +1, column=1, padx=(20, 20), pady=(10, 10), sticky="nsew")
         i = i+1
     
 
     # radio_var = tk.IntVar(value=0)
-    # label_radio_group = customtkinter.CTkLabel(master=checkbox_frame, text="CTkRadioButton Group:")
     # checkbox_1 = customtkinter.CTkCheckBox(master=checkbox_frame)
     # checkbox_1.grid(row=1, column=0, pady=(20, 0), padx=20, sticky="n")
     # checkbox_2 = customtkinter.CTkCheckBox(master=checkbox_frame)
@@ -230,10 +274,27 @@ def loadWorkbook(file_path):
     # checkbox_3.grid(row=3, column=0, pady=20, padx=20, sticky="n")
     
 
+    checkbox_var_temp = customtkinter.StringVar(value=temp[0])
+
+    checkbox2_frame = customtkinter.CTkScrollableFrame(main_window)
+    checkbox2_frame.grid(row=3, column=2, padx=(20, 20), pady=(10, 10), sticky="nsew")
+    checkbox2_frame.grid_columnconfigure(2, weight=1)
+
+    titre_checkbox2 = customtkinter.CTkLabel(master=checkbox2_frame, text="Filtrer par température : ", font=customtkinter.CTkFont(size=20))
+    titre_checkbox2.grid(row=1, column=1,  padx=(20, 20), pady=(10, 10), sticky="nsew")
+
+    i = 1
+    for temperature in temp[1:] : 
+        checkbox = customtkinter.CTkCheckBox(master=checkbox2_frame, text=temperature, variable=checkbox_var_temp, offvalue = temp[0], onvalue = temperature, command=checkbox_temp_callback)
+        checkbox.grid(row=i +1, column=1, padx=(20, 20), pady=(10, 10), sticky="nsew")
+        i = i+1
+        #main_window.label_stats = customtkinter.CTkLabel(main_window.tabView.tab("Prout"), textvariable= filter, font=customtkinter.CTkFont(size=10, weight="bold"))
+        #main_window.label_stats.place(relx=.5, rely=.7, anchor="center")
+
     
- 
-    #main_window.label_stats = customtkinter.CTkLabel(main_window.tabView.tab("Prout"), textvariable= filter, font=customtkinter.CTkFont(size=10, weight="bold"))
-    #main_window.label_stats.place(relx=.5, rely=.7, anchor="center")
+
+
+    
 
 def UploadAction():
     file_path = filedialog.askopenfilename()

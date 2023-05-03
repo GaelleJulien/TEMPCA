@@ -50,7 +50,7 @@ class MainWindow(customtkinter.CTk) :
         self.geometry(f"{1100}x{580}")
 
         self.grid_columnconfigure(1, weight=1)
-        self.grid_columnconfigure((2, 3), weight=0)
+        self.grid_columnconfigure((2, 3), weight=1)
         self.grid_rowconfigure((0, 1, 2, 3), weight=1)
 
 
@@ -80,7 +80,9 @@ class MainWindow(customtkinter.CTk) :
         self.toplevel_window = None
 
         self.tabView = customtkinter.CTkTabview(self, width=1200, corner_radius=0,)
-        self.tabView.grid(row=0, column=1, rowspan = 3, padx=(20, 20), pady=(10, 10), sticky="nsew")
+        self.tabView.grid(row=0, column=1, rowspan = 3, columnspan = 2, padx=(20, 20), pady=(10, 10), sticky="nsew")
+        self.tabView.grid_columnconfigure(1, weight=1)
+
         self.tabView.add("Prout")
         self.tabView.add("Tab 2")
         self.tabView.add("Tab 3")
