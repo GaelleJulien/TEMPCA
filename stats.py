@@ -37,7 +37,13 @@ fig.savefig("testPlot2.png")
 
 df = pd.DataFrame(moydf["sleep_efficiency (%)"])
 fig2 = df.plot(kind="bar", grid=True)
-fig2.get_figure().savefig("testPlot3")
+fig2.get_figure().savefig("sleep_efficiency_all_means.png")
+
+
+df = pd.DataFrame(moydf["SFI"])
+fig2 = df.plot(kind="bar", grid=True)
+fig2.get_figure().savefig("sfi_all_means.png")
+
 
 
 # df = pd.DataFrame({'lab':['A', 'B', 'C'], 'val':[10, 30, 20]})

@@ -214,7 +214,7 @@ def loadWorkbook(file_path):
         for i in df_tree.get_children():
             df_tree.delete(i)
         df_tree["show"] = "headings"
-        df_tree.place(relx=.5, rely=.6, anchor="center")
+        df_tree.grid(row=3, column=1, columnspan=2, padx=(20, 20), pady=(10, 10), sticky="nsew")
 
         for i in df_list:
             df_tree.column(i,width=75,anchor='c')
@@ -229,11 +229,11 @@ def loadWorkbook(file_path):
     optionmenu2_var = customtkinter.StringVar(value=temp[0])
 
     optionmenu_user = customtkinter.CTkOptionMenu(master=main_window.tabView.tab("Prout"), dynamic_resizing=False, values = users, command=optionmenu_user_callback, variable=optionmenu1_var)
-    optionmenu_user.grid(row=1, column=1, padx=(125, 125), pady=(20, 20), sticky="nsew")
+    optionmenu_user.grid(row=1, column=1, padx=(100, 100), pady=(20, 20), sticky="nsew")
     optionmenu_2 = customtkinter.CTkOptionMenu(master=main_window.tabView.tab("Prout"), dynamic_resizing=False, values = temp, command=optionmenu_temp_callback, variable=optionmenu2_var)
-    optionmenu_2.grid(row=1, column=10,  padx=(125, 125), pady=(20, 20), sticky="nsew")
-    optionmenu_2 = customtkinter.CTkOptionMenu(master=main_window.tabView.tab("Prout"), dynamic_resizing=False, values = users, command=optionmenu_user_callback, variable=optionmenu1_var)
-    optionmenu_2.grid(row=1, column=19,  padx=(125, 125), pady=(20, 20), sticky="nsew")
+    optionmenu_2.grid(row=1, column=2,  padx=(100, 100), pady=(20, 20), sticky="nsew")
+    optionmenu_3 = customtkinter.CTkOptionMenu(master=main_window.tabView.tab("Prout"), dynamic_resizing=False, values = users, command=optionmenu_user_callback, variable=optionmenu1_var)
+    optionmenu_3.grid(row=1, column=3,  padx=(100, 100), pady=(20, 20), sticky="nsew")
    
 
     # meansPlot = PhotoImage(file = "testPlot.png")
@@ -241,19 +241,19 @@ def loadWorkbook(file_path):
     zoom = 0.8
 
 
-    img = Image.open("testPlot.png")
+    img = Image.open("sfi_all_means.png")
     #multiple image size by zoom
     pixels_x, pixels_y = tuple([int(zoom * x)  for x in img.size])
     
     img = ImageTk.PhotoImage(img.resize((pixels_x, pixels_y)))
     panel = Label(main_window.tabView.tab("Tab 2"), image = img)
     panel.photo = img
-    panel.grid(column=1, row=1, padx=(20, 20), pady=(10, 10), sticky="nsew")
+    panel.grid(column=2, row=5, padx=(20, 20), pady=(10, 10), sticky="ew")
 
     checkbox_var_users = customtkinter.StringVar(value=users[0])
 
-    checkbox_frame = customtkinter.CTkScrollableFrame(main_window)
-    checkbox_frame.grid(row=3, column=1, padx=(20, 20), pady=(10, 10), sticky="nsew")
+    checkbox_frame = customtkinter.CTkScrollableFrame(main_window.tabView.tab("Prout"))
+    checkbox_frame.grid(row=8, column=1, padx=(20, 20), pady=(10, 10), sticky="nsew")
     checkbox_frame.grid_columnconfigure(1, weight=1)
     titre_checkbox = customtkinter.CTkLabel(master=checkbox_frame, text="Filtrer par user(s) : ", font=customtkinter.CTkFont(size=20))
     titre_checkbox.grid(row=1, column=1,  padx=(20, 20), pady=(10, 10), sticky="nsew")
@@ -276,8 +276,8 @@ def loadWorkbook(file_path):
 
     checkbox_var_temp = customtkinter.StringVar(value=temp[0])
 
-    checkbox2_frame = customtkinter.CTkScrollableFrame(main_window)
-    checkbox2_frame.grid(row=3, column=2, padx=(20, 20), pady=(10, 10), sticky="nsew")
+    checkbox2_frame = customtkinter.CTkScrollableFrame(main_window.tabView.tab("Prout"))
+    checkbox2_frame.grid(row=8, column=2, padx=(20, 20), pady=(10, 10), sticky="nsew")
     checkbox2_frame.grid_columnconfigure(2, weight=1)
 
     titre_checkbox2 = customtkinter.CTkLabel(master=checkbox2_frame, text="Filtrer par température : ", font=customtkinter.CTkFont(size=20))
@@ -314,4 +314,3 @@ buttonSelectionFichier.place(relx=.5, rely=.6, anchor="center")
 
 
 main_window.mainloop()
-

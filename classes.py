@@ -37,7 +37,7 @@ class ToplevelWindow(customtkinter.CTkToplevel):
         self.title("Pop up")
 
         self.label = customtkinter.CTkLabel(self, text="Pop up éclatée au sol")
-        self.label.pack(padx=20, pady=20)
+        self.label.pack(padx=(20,20), pady=20)
         self.after(20, self.lift)
 
         
@@ -51,7 +51,7 @@ class MainWindow(customtkinter.CTk) :
 
         self.grid_columnconfigure(1, weight=1)
         self.grid_columnconfigure((2, 3), weight=1)
-        self.grid_rowconfigure((0, 1, 2, 3), weight=1)
+        self.grid_rowconfigure((0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10), weight=1)
 
 
         
@@ -60,7 +60,7 @@ class MainWindow(customtkinter.CTk) :
         self.labelSelectionFichier.place(relx = 0.5, rely=0.3, anchor=CENTER)
         # create sidebar frame with widgets
         self.sidebar_frame = customtkinter.CTkFrame(self, width=140, corner_radius=0)
-        self.sidebar_frame.grid(row=0, column=0, rowspan=5, sticky="nsew")
+        self.sidebar_frame.grid(row=0, column=0, rowspan=10, sticky="nsew")
         self.sidebar_frame.grid_rowconfigure(4, weight=1)
         self.logo_label = customtkinter.CTkLabel(self.sidebar_frame, text="MENU", font=customtkinter.CTkFont(size=20, weight="bold"))
         self.logo_label.grid(row=0, column=0, padx=20, pady=(20, 10))
@@ -70,17 +70,18 @@ class MainWindow(customtkinter.CTk) :
         self.sidebar_button_2 = customtkinter.CTkButton(self.sidebar_frame )
         self.sidebar_button_2.grid(row=2, column=0, padx=20, pady=10)
         self.sidebar_button_3 = customtkinter.CTkButton(self.sidebar_frame)
-        self.sidebar_button_3.grid(row=3, column=0, padx=20, pady=10)
+        self.sidebar_button_3.grid(row=9, column=0, padx=20, pady=10)
 
         self.scaling_label = customtkinter.CTkLabel(self.sidebar_frame, text="UI Scaling:", anchor="w")
-        self.scaling_label.grid(row=7, column=0, padx=20, pady=(10, 0))
+        self.scaling_label.grid(row=8, column=0, padx=20, pady=(10, 0))
         self.scaling_optionemenu = customtkinter.CTkOptionMenu(self.sidebar_frame, values=["80%", "90%", "100%", "110%", "120%"],command=self.change_scaling_event)
         self.scaling_optionemenu.grid(row=8, column=0, padx=20, pady=(10, 20))
 
+
         self.toplevel_window = None
 
-        self.tabView = customtkinter.CTkTabview(self, width=1200, corner_radius=0,)
-        self.tabView.grid(row=0, column=1, rowspan = 3, columnspan = 2, padx=(20, 20), pady=(10, 10), sticky="nsew")
+        self.tabView = customtkinter.CTkTabview(self, width=1000, corner_radius=0)
+        self.tabView.grid(row=0, column=1, rowspan = 15, columnspan = 3, padx=(20, 20), pady=(10, 10), sticky="nsew")
         self.tabView.grid_columnconfigure(1, weight=1)
 
         self.tabView.add("Prout")
@@ -103,6 +104,3 @@ class MainWindow(customtkinter.CTk) :
     def change_scaling_event(self, new_scaling: str):
         new_scaling_float = int(new_scaling.replace("%", "")) / 100
         customtkinter.set_widget_scaling(new_scaling_float)
-
-
-
