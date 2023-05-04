@@ -80,9 +80,9 @@ class MainWindow(customtkinter.CTk) :
 
         self.toplevel_window = None
 
-        self.tabView = customtkinter.CTkTabview(self, width=1000, corner_radius=0)
+        self.tabView = customtkinter.CTkTabview(self, width=1200, corner_radius=0)
         self.tabView.grid(row=0, column=1, rowspan = 15, columnspan = 3, padx=(20, 20), pady=(10, 10), sticky="nsew")
-        self.tabView.grid_columnconfigure(1, weight=1)
+        self.tabView.grid_columnconfigure(2, weight=1)
 
         self.tabView.add("Prout")
         self.tabView.add("Tab 2")

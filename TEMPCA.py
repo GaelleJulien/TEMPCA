@@ -128,11 +128,13 @@ def loadWorkbook(file_path):
     filter.set(moy)
 
     def optionmenu_user_callback(choice):
-        filtrage= df["UserID"] == choice
         if(choice == users[0]):
             newdf = df
-        else : 
-            newdf = df[filtrage]
+        if(choice == users[1]): 
+            newdf = df.sort_values(by = "SFI")
+        if(choice == users[2]):
+            newdf = df.sort_values(by = "SFI", ascending=False)
+
         fillTable(newdf)
         
     
@@ -248,7 +250,7 @@ def loadWorkbook(file_path):
     img = ImageTk.PhotoImage(img.resize((pixels_x, pixels_y)))
     panel = Label(main_window.tabView.tab("Tab 2"), image = img)
     panel.photo = img
-    panel.grid(column=2, row=5, padx=(20, 20), pady=(10, 10), sticky="ew")
+    panel.grid(column=1, row=1, padx=(20, 20), pady=(10, 10), sticky="nsew")
 
     checkbox_var_users = customtkinter.StringVar(value=users[0])
 
@@ -265,13 +267,39 @@ def loadWorkbook(file_path):
         i = i+1
     
 
-    # radio_var = tk.IntVar(value=0)
-    # checkbox_1 = customtkinter.CTkCheckBox(master=checkbox_frame)
-    # checkbox_1.grid(row=1, column=0, pady=(20, 0), padx=20, sticky="n")
-    # checkbox_2 = customtkinter.CTkCheckBox(master=checkbox_frame)
-    # checkbox_2.grid(row=2, column=0, pady=(20, 0), padx=20, sticky="n")
-    # checkbox_3 = customtkinter.CTkCheckBox(master=checkbox_frame)
-    # checkbox_3.grid(row=3, column=0, pady=20, padx=20, sticky="n")
+    def radiobuttonSelection():
+        selection = "You selected the option " + str(radio_var.get())
+        print(selection)
+        if(radio_var.get() == 0):
+            img = Image.open("sleep_efficiency_all_means.png")
+            img = ImageTk.PhotoImage(img.resize((pixels_x, pixels_y)))
+            panel = Label(main_window.tabView.tab("Tab 2"), image = img)
+            panel.photo = img
+            panel.grid(column=1, row=1, padx=(20, 20), pady=(10, 10), sticky="nsew")
+        if(radio_var.get() == 1): 
+            img = Image.open("testPlot4.png")
+            img = ImageTk.PhotoImage(img.resize((pixels_x, pixels_y)))
+            panel = Label(main_window.tabView.tab("Tab 2"), image = img)
+            panel.photo = img
+            panel.grid(column=1, row=1, padx=(20, 20), pady=(10, 10), sticky="nsew")
+        if(radio_var.get() == 2): 
+            img = Image.open("testPlot3.png")
+            img = ImageTk.PhotoImage(img.resize((pixels_x, pixels_y)))
+            panel = Label(main_window.tabView.tab("Tab 2"), image = img)
+            panel.photo = img
+            panel.grid(column=1, row=1, padx=(20, 20), pady=(10, 10), sticky="nsew")
+            
+
+
+    radiobutton_frame = customtkinter.CTkFrame(main_window.tabView.tab("Tab 2"))
+    radiobutton_frame.grid(row=1, column=4, padx=(20, 20), pady=(10, 10), sticky="nsew")
+    radio_var = tk.IntVar(value=0)
+    radiobutton1 = customtkinter.CTkRadioButton(master=radiobutton_frame, variable=radio_var, value = 0, text="Option 1", command=radiobuttonSelection)
+    radiobutton1.grid(row=1, column=0, pady=(20, 0), padx=20, sticky="n")
+    radiobutton2 = customtkinter.CTkRadioButton(master=radiobutton_frame, variable=radio_var, value = 1, text="Cliquez ici si vous aimez Gaëlle", command=radiobuttonSelection)
+    radiobutton2.grid(row=2, column=0, pady=(20, 0), padx=20, sticky="n")
+    radobutton3 = customtkinter.CTkRadioButton(master=radiobutton_frame, variable=radio_var, value = 2, text = "Option 3", command=radiobuttonSelection)
+    radobutton3.grid(row=3, column=0, pady=20, padx=20, sticky="n")
     
 
     checkbox_var_temp = customtkinter.StringVar(value=temp[0])
