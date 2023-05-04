@@ -159,7 +159,11 @@ def loadWorkbook(file_path):
         else : 
             selected_users.append(checkbox_var_users.get())
             print(selected_users)
-            filtrage= (df["UserID"].isin(selected_users) & df["TEMP"].astype(str).isin(selected_temps))
+            if(selected_temps != []):
+                filtrage= (df["UserID"].isin(selected_users) & df["TEMP"].astype(str).isin(selected_temps))
+            else : 
+                filtrage= (df["UserID"].isin(selected_users))
+
             newdf_users = df[filtrage]
         fillTable(newdf_users)
 
@@ -173,7 +177,10 @@ def loadWorkbook(file_path):
         else : 
             selected_temps.append(checkbox_var_temp.get())
             print(selected_temps)
-            filtrage= df["TEMP"].astype(str).isin(selected_temps)
+            if(selected_users != []):
+                filtrage= (df["TEMP"].astype(str).isin(selected_temps) & df["UserID"].isin(selected_users))
+            else:
+                filtrage= (df["TEMP"].astype(str).isin(selected_temps))
             newdf_temp = df[filtrage]
 
         fillTable(newdf_temp)
