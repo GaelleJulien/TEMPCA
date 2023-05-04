@@ -20,7 +20,7 @@ import pandas as pd
 import pandastable as pt
 from pandastable import Table, TableModel, config
 
-from stats import moy, moydf, users, df, temp
+from stats import moy, moydf, users, df, temp, tri, triSE
 
 from PIL import ImageTk, Image
 
@@ -46,6 +46,7 @@ def loadWorkbook(file_path):
     stats = []
     selected_users=[]
     selected_temps=[]
+    selection = []
 
     activity = []
 
@@ -127,24 +128,25 @@ def loadWorkbook(file_path):
     filter = StringVar()
     filter.set(moy)
 
-    def optionmenu_user_callback(choice):
-        if(choice == users[0]):
+    def optionmenu_triSFI_callback(choice):
+        if(choice == tri[0]):
             newdf = df
-        if(choice == users[1]): 
+        if(choice == tri[1]): 
             newdf = df.sort_values(by = "SFI")
-        if(choice == users[2]):
+        if(choice == tri[2]):
             newdf = df.sort_values(by = "SFI", ascending=False)
 
         fillTable(newdf)
         
     
-    def optionmenu_temp_callback(choice):
-        filtrage= (df["TEMP"].astype('string') == choice)
-        filter.set (df.loc[df["TEMP"].astype('string') == "16"])
-        if(choice == temp[0]):
+    def optionmenu_triSE_callback(choice):
+
+        if(choice == triSE[0]):
             newdf = df
-        else : 
-            newdf = df[filtrage]
+        if(choice == triSE[1]): 
+            newdf = df.sort_values(by = "sleep_efficiency (%)")
+        if(choice == triSE[2]): 
+            newdf = df.sort_values(by = "sleep_efficiency (%)", ascending=False)
         fillTable(newdf)
 
 
@@ -153,14 +155,13 @@ def loadWorkbook(file_path):
         print(checkbox_var_users.get())
         if(checkbox_var_users.get() == users[0]):
             selected_users.clear()
-            newdf = df
+            newdf_users = df
         else : 
             selected_users.append(checkbox_var_users.get())
             print(selected_users)
-            filtrage= df["UserID"].isin(selected_users)
-            newdf = df[filtrage]
-
-        fillTable(newdf)
+            filtrage= (df["UserID"].isin(selected_users) & df["TEMP"].astype(str).isin(selected_temps))
+            newdf_users = df[filtrage]
+        fillTable(newdf_users)
 
 
 
@@ -168,14 +169,14 @@ def loadWorkbook(file_path):
         print(checkbox_var_temp.get())
         if(checkbox_var_temp.get() == temp[0]):
             selected_temps.clear()
-            newdf = df
+            newdf_temp = df
         else : 
             selected_temps.append(checkbox_var_temp.get())
             print(selected_temps)
             filtrage= df["TEMP"].astype(str).isin(selected_temps)
-            newdf = df[filtrage]
+            newdf_temp = df[filtrage]
 
-        fillTable(newdf)
+        fillTable(newdf_temp)
 
     workbook.save(filename= "test.xlsx")
     df = pd.DataFrame(pd.read_excel("test.xlsx"))
@@ -227,14 +228,14 @@ def loadWorkbook(file_path):
     
     fillTable(df)
 
-    optionmenu1_var = customtkinter.StringVar(value=users[0])
-    optionmenu2_var = customtkinter.StringVar(value=temp[0])
+    optionmenu1_var = customtkinter.StringVar(value=tri[0])
+    optionmenu2_var = customtkinter.StringVar(value=triSE[0])
 
-    optionmenu_user = customtkinter.CTkOptionMenu(master=main_window.tabView.tab("Prout"), dynamic_resizing=False, values = users, command=optionmenu_user_callback, variable=optionmenu1_var)
+    optionmenu_user = customtkinter.CTkOptionMenu(master=main_window.tabView.tab("Prout"), dynamic_resizing=False, values = tri, command=optionmenu_triSFI_callback, variable=optionmenu1_var)
     optionmenu_user.grid(row=1, column=1, padx=(100, 100), pady=(20, 20), sticky="nsew")
-    optionmenu_2 = customtkinter.CTkOptionMenu(master=main_window.tabView.tab("Prout"), dynamic_resizing=False, values = temp, command=optionmenu_temp_callback, variable=optionmenu2_var)
+    optionmenu_2 = customtkinter.CTkOptionMenu(master=main_window.tabView.tab("Prout"), dynamic_resizing=False, values = triSE, command=optionmenu_triSE_callback, variable=optionmenu2_var)
     optionmenu_2.grid(row=1, column=2,  padx=(100, 100), pady=(20, 20), sticky="nsew")
-    optionmenu_3 = customtkinter.CTkOptionMenu(master=main_window.tabView.tab("Prout"), dynamic_resizing=False, values = users, command=optionmenu_user_callback, variable=optionmenu1_var)
+    optionmenu_3 = customtkinter.CTkOptionMenu(master=main_window.tabView.tab("Prout"), dynamic_resizing=False, values = users, command=optionmenu_triSFI_callback, variable=optionmenu1_var)
     optionmenu_3.grid(row=1, column=3,  padx=(100, 100), pady=(20, 20), sticky="nsew")
    
 
@@ -306,7 +307,7 @@ def loadWorkbook(file_path):
 
     checkbox2_frame = customtkinter.CTkScrollableFrame(main_window.tabView.tab("Prout"))
     checkbox2_frame.grid(row=8, column=2, padx=(20, 20), pady=(10, 10), sticky="nsew")
-    checkbox2_frame.grid_columnconfigure(2, weight=1)
+    checkbox2_frame.grid_columnconfigure(1, weight=1)
 
     titre_checkbox2 = customtkinter.CTkLabel(master=checkbox2_frame, text="Filtrer par température : ", font=customtkinter.CTkFont(size=20))
     titre_checkbox2.grid(row=1, column=1,  padx=(20, 20), pady=(10, 10), sticky="nsew")

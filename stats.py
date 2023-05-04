@@ -2,7 +2,11 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import datetime as dt
 
-optionsTri = ["Ordre croissant (SFI)", "Ordre décroissant (SFI)"]
+
+
+optionsTri = ["SFI ordre croissant", "SFI ordre décroissant"]
+
+optionsTriSE = ["Sleep efficiency ordre croissant", "Sleep efficiency ordre décroissant"]
 
 df = pd.DataFrame(pd.read_excel("test.xlsx"))
 
@@ -10,12 +14,24 @@ dfsorted = df.sort_values(by = "SFI")
 
 df_num = df.select_dtypes(include=["float"]).columns
 
-users = ["Trier par...."]
+#filter = df["UserID"] == "05JB"
+users = ["Sujets..."]
 df = df.astype({"TEMP" : str})
-users.extend(optionsTri)
+users.extend(df["UserID"].drop_duplicates().to_list())
+print (users)
 
 temp = ["Température..."]
 temp.extend(df["TEMP"].drop_duplicates().to_list())
+
+
+
+tri = ["Trier en fonction du SFI..."]
+df = df.astype({"TEMP" : str})
+tri.extend(optionsTri)
+
+triSE = ["Trier en fonction de sleep_efficiency..."]
+df = df.astype({"TEMP" : str})
+triSE.extend(optionsTriSE)
 
 moydf = df.groupby("TEMP")[["sleep_efficiency (%)", "actual_sleep (%)", "actual_wake (%)", "SFI"]].mean()
 moy = str(moydf)
