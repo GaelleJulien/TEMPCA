@@ -152,10 +152,24 @@ def loadWorkbook(file_path):
 
 
     def checkbox_user_callback():
-        print(checkbox_var_users.get())
-        if(checkbox_var_users.get() == users[0]):
-            selected_users.clear()
-            newdf_users = df
+        if(checkbox_var_users.get() in selected_users):
+            selected_users.remove(checkbox_var_users.get())
+            print(selected_users)
+            if(selected_temps != []):
+                if(selected_users == []) :
+                    filtrage = (df["TEMP"].astype(str).isin(selected_temps)) 
+                    newdf_users = df[filtrage]
+                else :
+                    filtrage= (df["UserID"].isin(selected_users) & df["TEMP"].astype(str).isin(selected_temps))
+                    newdf_users = df[filtrage]
+
+            else : 
+                if(selected_users == []) :
+                    newdf_users = df
+                else : 
+                    filtrage= (df["UserID"].isin(selected_users))
+                    newdf_users = df[filtrage]
+            
         else : 
             selected_users.append(checkbox_var_users.get())
             print(selected_users)
@@ -165,15 +179,31 @@ def loadWorkbook(file_path):
                 filtrage= (df["UserID"].isin(selected_users))
 
             newdf_users = df[filtrage]
+        
         fillTable(newdf_users)
 
 
 
     def checkbox_temp_callback():
         print(checkbox_var_temp.get())
-        if(checkbox_var_temp.get() == temp[0]):
-            selected_temps.clear()
-            newdf_temp = df
+        if(checkbox_var_temp.get() in selected_temps):
+            selected_temps.remove(checkbox_var_temp.get())
+            if(selected_users != []):
+                if(selected_temps == []) :
+                    filtrage = (df["UserID"].isin(selected_users)) 
+                    newdf_temp = df[filtrage]
+                else:
+                    filtrage= (df["UserID"].isin(selected_users) & df["TEMP"].astype(str).isin(selected_temps))
+                    newdf_temp = df[filtrage]
+
+
+            else : 
+                if(selected_temps == []) :
+                    newdf_temp = df
+                else : 
+                    filtrage= (df["TEMP"].astype(str).isin(selected_temps))
+                    newdf_temp = df[filtrage]
+            
         else : 
             selected_temps.append(checkbox_var_temp.get())
             print(selected_temps)
@@ -270,7 +300,7 @@ def loadWorkbook(file_path):
 
     i = 1
     for user in users [1:] : 
-        checkbox = customtkinter.CTkCheckBox(master=checkbox_frame, text=user, variable=checkbox_var_users, offvalue = users[0], onvalue = user, command=checkbox_user_callback)
+        checkbox = customtkinter.CTkCheckBox(master=checkbox_frame, text=user, variable=checkbox_var_users, offvalue = user, onvalue = user, command=checkbox_user_callback)
         checkbox.grid(row=i +1, column=1, padx=(20, 20), pady=(10, 10), sticky="nsew")
         i = i+1
     
@@ -321,7 +351,7 @@ def loadWorkbook(file_path):
 
     i = 1
     for temperature in temp[1:] : 
-        checkbox = customtkinter.CTkCheckBox(master=checkbox2_frame, text=temperature, variable=checkbox_var_temp, offvalue = temp[0], onvalue = temperature, command=checkbox_temp_callback)
+        checkbox = customtkinter.CTkCheckBox(master=checkbox2_frame, text=temperature, variable=checkbox_var_temp, offvalue = temperature, onvalue = temperature, command=checkbox_temp_callback)
         checkbox.grid(row=i +1, column=1, padx=(20, 20), pady=(10, 10), sticky="nsew")
         i = i+1
         #main_window.label_stats = customtkinter.CTkLabel(main_window.tabView.tab("Prout"), textvariable= filter, font=customtkinter.CTkFont(size=10, weight="bold"))
