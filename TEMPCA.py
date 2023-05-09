@@ -304,19 +304,22 @@ def loadWorkbook(file_path):
     def radiobuttonSelection():
         selection = "You selected the option " + str(radio_var.get())
         print(selection)
-        if(radio_var.get() == 0):
-            img = Image.open("sleep_efficiency_all_means.png")
+        if(radio_var.get() == "Histogramme"):
+            if(radio2_var.get() == "SFI"):
+                img = Image.open("sleep_efficiency_all_means.png")
+            else : 
+                img = Image.open("sfi_all_means.png")
             img = ImageTk.PhotoImage(img.resize((pixels_x, pixels_y)))
             panel = Label(main_window.tabView.tab("Tab 2"), image = img)
             panel.photo = img
             panel.grid(column=1, row=1, padx=(20, 20), pady=(10, 10), sticky="nsew")
-        if(radio_var.get() == 1): 
+        if(radio_var.get() == "autre"): 
             img = Image.open("testPlot4.png")
             img = ImageTk.PhotoImage(img.resize((pixels_x, pixels_y)))
             panel = Label(main_window.tabView.tab("Tab 2"), image = img)
             panel.photo = img
             panel.grid(column=1, row=1, padx=(20, 20), pady=(10, 10), sticky="nsew")
-        if(radio_var.get() == 2): 
+        if(radio_var.get() == "Boîtes à moustache"): 
             img = Image.open("boxplot2.png")
             img = ImageTk.PhotoImage(img.resize((pixels_x, pixels_y)))
             panel = Label(main_window.tabView.tab("Tab 2"), image = img)
@@ -324,29 +327,36 @@ def loadWorkbook(file_path):
             panel.grid(column=1, row=1, padx=(20, 20), pady=(10, 10), sticky="nsew")
             
 
+    def radiobuttonSelection2():
+        selection = "You selected the option " + str(radio2_var.get())
+        print(selection)
 
     radiobutton_frame = customtkinter.CTkFrame(main_window.tabView.tab("Tab 2"))
     radiobutton_frame.grid(row=1, column=4, padx=(20, 20), pady=(10, 10), sticky="nsew")
-    radio_var = tk.IntVar(value=0)
-    radiobutton1 = customtkinter.CTkRadioButton(master=radiobutton_frame, variable=radio_var, value = 0, text="Option 1", command=radiobuttonSelection)
-    radiobutton1.grid(row=1, column=0, pady=(20, 0), padx=20, sticky="n")
-    radiobutton2 = customtkinter.CTkRadioButton(master=radiobutton_frame, variable=radio_var, value = 1, text="Cliquez ici si vous aimez Gaëlle", command=radiobuttonSelection)
-    radiobutton2.grid(row=2, column=0, pady=(20, 0), padx=20, sticky="n")
-    radobutton3 = customtkinter.CTkRadioButton(master=radiobutton_frame, variable=radio_var, value = 2, text = "Option 3", command=radiobuttonSelection)
-    radobutton3.grid(row=3, column=0, pady=20, padx=20, sticky="n")
+    radio_var = tk.StringVar(value = "Histogramme")
+    radiobutton1 = customtkinter.CTkRadioButton(master=radiobutton_frame, variable=radio_var, value = "Histogramme", text="Histogramme", command=radiobuttonSelection)
+    radiobutton1.grid(row=2, column=0, pady=(20, 0), padx=20, sticky="nsew")
+    radiobutton2 = customtkinter.CTkRadioButton(master=radiobutton_frame, variable=radio_var, value = "autre", text="Cliquez ici si vous aimez Gaëlle", command=radiobuttonSelection)
+    radiobutton2.grid(row=3, column=0, pady=(20, 0), padx=20, sticky="nsew")
+    radobutton3 = customtkinter.CTkRadioButton(master=radiobutton_frame, variable=radio_var, value = "Boîtes à moustache", text = "Boîtes à moustache", command=radiobuttonSelection)
+    radobutton3.grid(row=4, column=0, pady=20, padx=20, sticky="nsew")
+    
+    titre_radioframe = customtkinter.CTkLabel(master=radiobutton_frame, text="Type de graphe : ", font=customtkinter.CTkFont(size=20))
+    titre_radioframe.grid(row=1, column=0,  padx=(20, 20), pady=(10, 10), sticky="nsew")
 
 
     checkbox_frame.grid_rowconfigure(2, weight=0)
 
     radiobutton_frame2 = customtkinter.CTkFrame(main_window.tabView.tab("Tab 2"))
     radiobutton_frame2.grid(row=3, column=4, padx=(20, 20), pady=(10, 10), sticky="nsew")
-    radio_var = tk.IntVar(value=0)
-    radiobutton3 = customtkinter.CTkRadioButton(master=radiobutton_frame2, variable=radio_var, value = 0, text="Option 1", command=radiobuttonSelection)
-    radiobutton3.grid(row=1, column=0, pady=(20, 0), padx=20, sticky="n")
-    radiobutton4 = customtkinter.CTkRadioButton(master=radiobutton_frame2, variable=radio_var, value = 1, text="Cliquez ici si vous aimez Gaëlle", command=radiobuttonSelection)
-    radiobutton4.grid(row=2, column=0, pady=(20, 0), padx=20, sticky="n")
-    radobutton5 = customtkinter.CTkRadioButton(master=radiobutton_frame2, variable=radio_var, value = 2, text = "Option 3", command=radiobuttonSelection)
-    radobutton5.grid(row=3, column=0, pady=20, padx=20, sticky="n")
+    radio2_var = tk.StringVar(value="default")
+    radiobutton3 = customtkinter.CTkRadioButton(master=radiobutton_frame2, variable=radio2_var, value = "Sleep efficiency (%)", text="Sleep efficiency (%)", command=radiobuttonSelection)
+    radiobutton3.grid(row=2, column=0, pady=(20, 0), padx=20, sticky="nsew")
+    radiobutton4 = customtkinter.CTkRadioButton(master=radiobutton_frame2, variable=radio2_var, value = "SFI", text="SFI", command=radiobuttonSelection)
+    radiobutton4.grid(row=3, column=0, pady=(20, 0), padx=20, sticky="nsew")
+
+    titre_radioframe2 = customtkinter.CTkLabel(master=radiobutton_frame2, text="Variable : ", font=customtkinter.CTkFont(size=20))
+    titre_radioframe2.grid(row=1, column=0,  padx=(20, 20), pady=(10, 10), sticky="nsew")
     
 
     checkbox_var_temp = customtkinter.StringVar(value=temp[0])
