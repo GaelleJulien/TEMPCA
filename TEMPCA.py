@@ -46,7 +46,6 @@ def loadWorkbook(file_path):
     stats = []
     selected_users=[]
     selected_temps=[]
-    selection = []
 
     activity = []
 
@@ -70,9 +69,6 @@ def loadWorkbook(file_path):
 
 
     sheet = workbook2.active
-
-    values = Reference(sheet, min_col=2, min_row=19, max_col=2, max_row=1039)
-    x_values = Reference(sheet, range_string="chart!A20:A1039")
 
     workbook = Workbook()
     sheet = workbook.active
@@ -136,7 +132,7 @@ def loadWorkbook(file_path):
         if(choice == tri[2]):
             newdf = df.sort_values(by = "SFI", ascending=False)
 
-        fillTable(newdf)
+        fillTable(newdf, "Prout"), 
         
     
     def optionmenu_triSE_callback(choice):
@@ -147,7 +143,7 @@ def loadWorkbook(file_path):
             newdf = df.sort_values(by = "sleep_efficiency (%)")
         if(choice == triSE[2]): 
             newdf = df.sort_values(by = "sleep_efficiency (%)", ascending=False)
-        fillTable(newdf)
+        fillTable(newdf, "Prout")
 
 
 
@@ -180,7 +176,7 @@ def loadWorkbook(file_path):
 
             newdf_users = df[filtrage]
         
-        fillTable(newdf_users)
+        fillTable(newdf_users, "Prout")
 
 
 
@@ -213,7 +209,7 @@ def loadWorkbook(file_path):
                 filtrage= (df["TEMP"].astype(str).isin(selected_temps))
             newdf_temp = df[filtrage]
 
-        fillTable(newdf_temp)
+        fillTable(newdf_temp, "Prout")
 
     workbook.save(filename= "test.xlsx")
     df = pd.DataFrame(pd.read_excel("test.xlsx"))
@@ -245,16 +241,16 @@ def loadWorkbook(file_path):
 
 
 
-    def fillTable(newdf):
+    def fillTable(newdf, tab):
         
-        df_list=list(df)
+        df_list=list(newdf)
         df_rset=newdf.round(2).to_numpy().tolist()
 
-        df_tree = ttk.Treeview(main_window.tabView.tab("Prout"), columns=df_list)
+        df_tree = ttk.Treeview(main_window.tabView.tab(tab), columns=df_list)
         for i in df_tree.get_children():
             df_tree.delete(i)
         df_tree["show"] = "headings"
-        df_tree.grid(row=3, column=1, columnspan=2, padx=(20, 20), pady=(10, 10), sticky="nsew")
+        df_tree.grid(row=3, column=1, columnspan=3, padx=(20, 20), pady=(10, 10), sticky="ew")
 
         for i in df_list:
             df_tree.column(i,width=75,anchor='c')
@@ -263,7 +259,7 @@ def loadWorkbook(file_path):
             v=[r for r in dt]
             df_tree.insert('','end', values=v)
     
-    fillTable(df)
+    fillTable(df, "Prout")
 
     optionmenu1_var = customtkinter.StringVar(value=tri[0])
     optionmenu2_var = customtkinter.StringVar(value=triSE[0])
@@ -321,7 +317,7 @@ def loadWorkbook(file_path):
             panel.photo = img
             panel.grid(column=1, row=1, padx=(20, 20), pady=(10, 10), sticky="nsew")
         if(radio_var.get() == 2): 
-            img = Image.open("testPlot3.png")
+            img = Image.open("boxplot2.png")
             img = ImageTk.PhotoImage(img.resize((pixels_x, pixels_y)))
             panel = Label(main_window.tabView.tab("Tab 2"), image = img)
             panel.photo = img
@@ -338,6 +334,19 @@ def loadWorkbook(file_path):
     radiobutton2.grid(row=2, column=0, pady=(20, 0), padx=20, sticky="n")
     radobutton3 = customtkinter.CTkRadioButton(master=radiobutton_frame, variable=radio_var, value = 2, text = "Option 3", command=radiobuttonSelection)
     radobutton3.grid(row=3, column=0, pady=20, padx=20, sticky="n")
+
+
+    checkbox_frame.grid_rowconfigure(2, weight=0)
+
+    radiobutton_frame2 = customtkinter.CTkFrame(main_window.tabView.tab("Tab 2"))
+    radiobutton_frame2.grid(row=3, column=4, padx=(20, 20), pady=(10, 10), sticky="nsew")
+    radio_var = tk.IntVar(value=0)
+    radiobutton3 = customtkinter.CTkRadioButton(master=radiobutton_frame2, variable=radio_var, value = 0, text="Option 1", command=radiobuttonSelection)
+    radiobutton3.grid(row=1, column=0, pady=(20, 0), padx=20, sticky="n")
+    radiobutton4 = customtkinter.CTkRadioButton(master=radiobutton_frame2, variable=radio_var, value = 1, text="Cliquez ici si vous aimez Gaëlle", command=radiobuttonSelection)
+    radiobutton4.grid(row=2, column=0, pady=(20, 0), padx=20, sticky="n")
+    radobutton5 = customtkinter.CTkRadioButton(master=radiobutton_frame2, variable=radio_var, value = 2, text = "Option 3", command=radiobuttonSelection)
+    radobutton5.grid(row=3, column=0, pady=20, padx=20, sticky="n")
     
 
     checkbox_var_temp = customtkinter.StringVar(value=temp[0])
@@ -354,9 +363,13 @@ def loadWorkbook(file_path):
         checkbox = customtkinter.CTkCheckBox(master=checkbox2_frame, text=temperature, variable=checkbox_var_temp, offvalue = temperature, onvalue = temperature, command=checkbox_temp_callback)
         checkbox.grid(row=i +1, column=1, padx=(20, 20), pady=(10, 10), sticky="nsew")
         i = i+1
-        #main_window.label_stats = customtkinter.CTkLabel(main_window.tabView.tab("Prout"), textvariable= filter, font=customtkinter.CTkFont(size=10, weight="bold"))
-        #main_window.label_stats.place(relx=.5, rely=.7, anchor="center")
+    
+    statsvar = customtkinter.StringVar(value=moy)
+    fillTable(moydf, "Tab 2")
+    
 
+
+    
     
 
 
