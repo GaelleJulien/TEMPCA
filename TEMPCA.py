@@ -32,12 +32,16 @@ customtkinter.set_default_color_theme("green")  # Themes: "blue" (standard), "gr
 
 
 file_path = ""
-filter = "O5JB"
-filter2 = "24"
+
+activity = []
 
 
 main_window = MainWindow()
 
+
+
+def ajouter_point(heure, valeur):
+    activity.append([heure, valeur])
         
 
 def loadWorkbook(file_path):
@@ -47,13 +51,25 @@ def loadWorkbook(file_path):
     selected_users=[]
     selected_temps=[]
 
-    activity = []
 
 
     #parcours des feuilles
     for sheet in workbook2 : 
     
         activity.clear()
+        df2 = pd.read_excel("donnees_actimetres.xlsx", sheet.title, skiprows=18)
+        heures = df2['Time']
+        valeurs = df2['Activity']
+        for i in range(len(heures)):
+            heure = heures[i]
+            valeur = valeurs[i]
+            activity.append([heure, valeur])
+
+
+        
+        # x_axis = df2["Time"].values
+        # fig = df3.plot(x="Time", y = "Activity").get_figure()
+        # fig.savefig("testPlot2.png")
 
         
         #les titres des feuilles sont au format USERID_TEMP (c'est moi qui l'ai décidé nah)
@@ -63,12 +79,13 @@ def loadWorkbook(file_path):
         stat = Stats(id = sheet[USERID].value, TEMP = temperaure, SPT=sheet[ASSUMED_SLEEP].value, TST= sheet[ACTUAL_SLEEP_TIME].value, 
                  actual_sleep_rate = sheet[ACTUAL_SLEEP_RATE].value, actual_wake_time=sheet[ACTUAL_WAKE_TIME].value, actual_wake_rate = sheet[ACTUAL_WAKE_RATE].value, 
                  TIB=sheet[TIME_IN_BED].value, sleep_efficiency=sheet[SLEEP_EFFICIENCY].value,lights_out=sheet[LIGHTS_OUT].value, fell_asleep=sheet[FELL_ASLEEP].value, 
-                 sleep_latency=sheet[SLEEP_LATENCY].value ,woke_up=sheet[WOKE_UP].value, got_up=sheet[GOT_UP].value, SFI=sheet[FRAGMENTATION_INDEX].value)
+                 sleep_latency=sheet[SLEEP_LATENCY].value ,woke_up=sheet[WOKE_UP].value, got_up=sheet[GOT_UP].value, SFI=sheet[FRAGMENTATION_INDEX].value, activity=activity)
     
         stats.append(stat)
 
 
     sheet = workbook2.active
+
 
     workbook = Workbook()
     sheet = workbook.active
@@ -123,6 +140,7 @@ def loadWorkbook(file_path):
 
     filter = StringVar()
     filter.set(moy)
+
 
     def optionmenu_triSFI_callback(choice):
         if(choice == tri[0]):
@@ -212,6 +230,22 @@ def loadWorkbook(file_path):
         fillTable(newdf_temp, "Prout")
 
     workbook.save(filename= "test.xlsx")
+
+
+    
+    workbook3 = Workbook()
+
+    for instance in stats: 
+        ws = workbook3.create_sheet(title=instance.id)
+        donnees = instance.activity
+        for i, donnee in enumerate(donnees):
+            heure = donnee[0]
+            activite = donnee[1]
+            ws.cell(row=i+1, column=1, value=heure)
+            ws.cell(row=i+1, column=2, value=activite)
+    workbook3.save("test_activite.xlsx")
+
+    
     df = pd.DataFrame(pd.read_excel("test.xlsx"))
 
     buttonSelectionFichier.destroy()
@@ -271,14 +305,11 @@ def loadWorkbook(file_path):
     optionmenu_3 = customtkinter.CTkOptionMenu(master=main_window.tabView.tab("Prout"), dynamic_resizing=False, values = users, command=optionmenu_triSFI_callback, variable=optionmenu1_var)
     optionmenu_3.grid(row=1, column=3,  padx=(100, 100), pady=(20, 20), sticky="nsew")
    
-
-    # meansPlot = PhotoImage(file = "testPlot.png")
-    # Label(master=main_window.tabView.tab("Tab 2"),image=meansPlot).grid(row=1, column=1,  padx=(20, 20), pady=(10, 10), sticky="nsew")
     zoom = 0.8
 
 
     img = Image.open("sfi_all_means.png")
-    #multiple image size by zoom
+
     pixels_x, pixels_y = tuple([int(zoom * x)  for x in img.size])
     
     img = ImageTk.PhotoImage(img.resize((pixels_x, pixels_y)))
@@ -302,39 +333,46 @@ def loadWorkbook(file_path):
     
 
     def radiobuttonSelection():
-        selection = "You selected the option " + str(radio_var.get())
-        print(selection)
-        if(radio_var.get() == "Histogramme"):
+
+        if(radio_var.get() == "Histogramme (moyennes)"):
+            
             if(radio2_var.get() == "SFI"):
-                img = Image.open("sleep_efficiency_all_means.png")
-            else : 
                 img = Image.open("sfi_all_means.png")
+            elif(radio2_var.get() == "Sleep efficiency (%)") : 
+                img = Image.open("sleep_efficiency_all_means.png")
+            elif(radio2_var.get() == "sleep_latency"): 
+                img = Image.open("sleep_latency_all_means.png")
+            elif(radio2_var.get() == "Tout"):
+                img = Image.open("all_means.png")
+
             img = ImageTk.PhotoImage(img.resize((pixels_x, pixels_y)))
             panel = Label(main_window.tabView.tab("Tab 2"), image = img)
             panel.photo = img
             panel.grid(column=1, row=1, padx=(20, 20), pady=(10, 10), sticky="nsew")
-        if(radio_var.get() == "autre"): 
+        elif(radio_var.get() == "autre"): 
             img = Image.open("testPlot4.png")
             img = ImageTk.PhotoImage(img.resize((pixels_x, pixels_y)))
             panel = Label(main_window.tabView.tab("Tab 2"), image = img)
             panel.photo = img
             panel.grid(column=1, row=1, padx=(20, 20), pady=(10, 10), sticky="nsew")
-        if(radio_var.get() == "Boîtes à moustache"): 
-            img = Image.open("boxplot2.png")
+        elif(radio_var.get() == "Boîtes à moustache"): 
+            if(radio2_var.get() == "SFI"):
+                img = Image.open("boxplotSFI.png")
+            elif(radio2_var.get() == "Sleep efficiency (%)") : 
+                    img = Image.open("boxplotSE.png")
+            elif(radio2_var.get() == "sleep_latency"):
+                    img = Image.open("boxplotSL.png")
+
             img = ImageTk.PhotoImage(img.resize((pixels_x, pixels_y)))
             panel = Label(main_window.tabView.tab("Tab 2"), image = img)
             panel.photo = img
             panel.grid(column=1, row=1, padx=(20, 20), pady=(10, 10), sticky="nsew")
-            
-
-    def radiobuttonSelection2():
-        selection = "You selected the option " + str(radio2_var.get())
-        print(selection)
 
     radiobutton_frame = customtkinter.CTkFrame(main_window.tabView.tab("Tab 2"))
     radiobutton_frame.grid(row=1, column=4, padx=(20, 20), pady=(10, 10), sticky="nsew")
-    radio_var = tk.StringVar(value = "Histogramme")
-    radiobutton1 = customtkinter.CTkRadioButton(master=radiobutton_frame, variable=radio_var, value = "Histogramme", text="Histogramme", command=radiobuttonSelection)
+    radio_var = tk.StringVar(value = "Histogramme (moyennes)")
+
+    radiobutton1 = customtkinter.CTkRadioButton(master=radiobutton_frame, variable=radio_var, value = "Histogramme (moyennes)", text="Histogramme (moyennes)", command=radiobuttonSelection)
     radiobutton1.grid(row=2, column=0, pady=(20, 0), padx=20, sticky="nsew")
     radiobutton2 = customtkinter.CTkRadioButton(master=radiobutton_frame, variable=radio_var, value = "autre", text="Cliquez ici si vous aimez Gaëlle", command=radiobuttonSelection)
     radiobutton2.grid(row=3, column=0, pady=(20, 0), padx=20, sticky="nsew")
@@ -349,11 +387,16 @@ def loadWorkbook(file_path):
 
     radiobutton_frame2 = customtkinter.CTkFrame(main_window.tabView.tab("Tab 2"))
     radiobutton_frame2.grid(row=3, column=4, padx=(20, 20), pady=(10, 10), sticky="nsew")
-    radio2_var = tk.StringVar(value="default")
+    radio2_var = tk.StringVar(value="SFI")
     radiobutton3 = customtkinter.CTkRadioButton(master=radiobutton_frame2, variable=radio2_var, value = "Sleep efficiency (%)", text="Sleep efficiency (%)", command=radiobuttonSelection)
     radiobutton3.grid(row=2, column=0, pady=(20, 0), padx=20, sticky="nsew")
     radiobutton4 = customtkinter.CTkRadioButton(master=radiobutton_frame2, variable=radio2_var, value = "SFI", text="SFI", command=radiobuttonSelection)
     radiobutton4.grid(row=3, column=0, pady=(20, 0), padx=20, sticky="nsew")
+    radiobutton5 = customtkinter.CTkRadioButton(master=radiobutton_frame2, variable=radio2_var, value = "sleep_latency", text="sleep_latency", command=radiobuttonSelection)
+    radiobutton5.grid(row=4, column=0, pady=(20, 0), padx=20, sticky="nsew")
+    radiobutton6 = customtkinter.CTkRadioButton(master=radiobutton_frame2, variable=radio2_var, value = "Tout", text="Tout", command=radiobuttonSelection)
+    radiobutton6.grid(row=2, column=1, pady=(20, 0), padx=20, sticky="nsew")
+
 
     titre_radioframe2 = customtkinter.CTkLabel(master=radiobutton_frame2, text="Variable : ", font=customtkinter.CTkFont(size=20))
     titre_radioframe2.grid(row=1, column=0,  padx=(20, 20), pady=(10, 10), sticky="nsew")
@@ -376,6 +419,9 @@ def loadWorkbook(file_path):
     
     statsvar = customtkinter.StringVar(value=moy)
     fillTable(moydf, "Tab 2")
+
+
+
     
 
 

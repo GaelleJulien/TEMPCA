@@ -26,6 +26,7 @@ class Stats :
     woke_up : datetime
     got_up : datetime
     SFI : float
+    activity : list
 
 
 
