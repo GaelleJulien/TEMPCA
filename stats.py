@@ -10,12 +10,15 @@ optionsTriSE = ["Sleep efficiency ordre croissant", "Sleep efficiency ordre déc
 
 df = pd.DataFrame(pd.read_excel("test.xlsx"))
 
+SFI_EC_total = df["SFI"].std()
+SE_EC_total = df["sleep_efficiency (%)"].std()
+AS_EC_total = df["actual_sleep (%)"].std()
+
 
 dfsorted = df.sort_values(by = "SFI")
 
 df_num = df.select_dtypes(include=["float"]).columns
 
-#filter = df["UserID"] == "05JB"
 users = ["Sujets..."]
 df = df.astype({"TEMP" : str})
 df["sleep_latency" ]= df["sleep_latency"].astype("string")
@@ -43,47 +46,65 @@ moydf = df
 moydf = moydf.groupby("TEMP")[["sleep_efficiency (%)", "actual_sleep (%)", "actual_wake (%)", "sleep_latency", "SFI"]].mean()
 
 
+fig, ax = plt.subplots()
 
 moydf.reset_index(inplace = True)
 moydf = moydf.rename(columns={"index" : "temperature"})
 moydf["sleep_latency"] = moydf["sleep_latency"].astype(str).map(lambda x: x[7:15])
-print(moydf["sleep_latency"])
+
+plotMoy = moydf.plot.bar(x = "TEMP")
+plt.savefig("plotMoyennes.png")
+
+#print(moydf["sleep_latency"])
 
 moy = str(moydf)
+moydf["sleep_latency"] =  pd.to_timedelta(moydf["sleep_latency" ])
 
 
 
-df2 = pd.read_excel("donnees_actimetres.xlsx", "05JB_32", skiprows=18)
-df2_columns = ["Time", "Activity"]
+# df2 = pd.read_excel("donnees_actimetres.xlsx", "05JB_32", skiprows=18)
+# df2_columns = ["Time", "Activity"]
 
-df3 = df2[df2_columns]
-df3["Time"] = (df3["Time"]).astype(str)
-df3["Activity"] = df3["Activity"].astype(int)
+# df3 = df2[df2_columns]
+# df3["Time"] = (df3["Time"]).astype(str)
+# df3["Activity"] = df3["Activity"].astype(int)
 
-df3.set_index("Time")
-x_axis = df2["Time"].values
-fig = df3.plot(x="Time", y = "Activity").get_figure()
-fig.savefig("testPlot2.png")
-
-
-dfBox = pd.DataFrame(df[["sleep_efficiency (%)", "TEMP"]])
-boxfig = dfBox.plot.box(by="TEMP")
-plt.savefig("boxplot2.png")
-
-dfBoxTime = pd.DataFrame(df[["SFI", "TEMP"]])
-boxfig = dfBoxTime.plot.box(by="TEMP")
-plt.savefig("boxplot3.png")
+# df3.set_index("Time")
+# x_axis = df2["Time"].values
+# fig = df3.plot(x="Time", y = "Activity").get_figure()
+# fig.savefig("testPlot2.png")
 
 
-df = pd.DataFrame(moydf["sleep_efficiency (%)"])
-fig2 = df.plot(kind="bar", grid=True)
-fig2.get_figure().savefig("sleep_efficiency_all_means.png")
+
+dfBoxSE = pd.DataFrame(df[["sleep_efficiency (%)", "TEMP"]])
+boxfig = dfBoxSE.plot.box(by="TEMP")
+plt.savefig("boxplotSE.png")
 
 
-df = pd.DataFrame(moydf["SFI"])
-fig2 = df.plot(kind="bar", grid=True)
-fig2.get_figure().savefig("sfi_all_means.png")
+dfBoxTimeSFI = pd.DataFrame(df[["SFI", "TEMP"]])
+boxfig = dfBoxTimeSFI.plot.box(by="TEMP")
+plt.savefig("boxplotSFI.png")
 
-# df = pd.DataFrame({'lab':['A', 'B', 'C'], 'val':[10, 30, 20]})
-# ax = df.plot.bar(x='lab', y='val', rot=0)
-# ax.get_figure().savefig("testPlot3")
+
+df["sleep_latency" ] = df["sleep_latency" ] / pd.Timedelta(minutes=1)
+print(df["sleep_latency"])
+dfBoxTimeSL = pd.DataFrame(df[["sleep_latency", "TEMP"]])
+boxfig = dfBoxTimeSL.plot.box(by="TEMP")
+plt.savefig("boxplotSL.png")
+
+df = pd.DataFrame(moydf[["sleep_efficiency (%)", "TEMP"]])
+fig2 = df.plot.bar(x = "TEMP", y = "sleep_efficiency (%)", rot = 0,)
+plt.savefig("sleep_efficiency_all_means.png")
+
+df = pd.DataFrame(moydf[["SFI", "TEMP"]])
+fig2 = df.plot.bar(x = "TEMP", y = "SFI", rot = 0)
+plt.savefig("sfi_all_means.png")
+
+moydf["sleep_latency" ] = moydf["sleep_latency" ] / pd.Timedelta(minutes=1)
+df = pd.DataFrame(moydf[["sleep_latency", "TEMP"]])
+fig3 = df.plot.bar(x = "TEMP", y = "sleep_latency", rot = 0,)
+plt.savefig("sleep_latency_all_means.png")
+
+df = pd.DataFrame(moydf)
+fig3 = df.plot.bar(x = "TEMP", rot = 0,)
+plt.savefig("all_means.png")
