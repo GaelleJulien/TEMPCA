@@ -33,7 +33,7 @@ customtkinter.set_default_color_theme("green")  # Themes: "blue" (standard), "gr
 
 file_path = ""
 
-activity = []
+activityDonnees = []
 
 
 main_window = MainWindow()
@@ -41,7 +41,7 @@ main_window = MainWindow()
 
 
 def ajouter_point(heure, valeur):
-    activity.append([heure, valeur])
+    activityDonnees.append([heure, valeur])
         
 
 def loadWorkbook(file_path):
@@ -56,14 +56,15 @@ def loadWorkbook(file_path):
     #parcours des feuilles
     for sheet in workbook2 : 
     
-        activity.clear()
-        df2 = pd.read_excel("donnees_actimetres.xlsx", sheet.title, skiprows=18)
+        activityDonnees = []
+
+        df2 = pd.read_excel(file_path, sheet.title, skiprows=18)
         heures = df2['Time']
         valeurs = df2['Activity']
         for i in range(len(heures)):
             heure = heures[i]
             valeur = valeurs[i]
-            activity.append([heure, valeur])
+            activityDonnees.append([heure, valeur])
 
 
         
@@ -79,9 +80,12 @@ def loadWorkbook(file_path):
         stat = Stats(id = sheet[USERID].value, TEMP = temperaure, SPT=sheet[ASSUMED_SLEEP].value, TST= sheet[ACTUAL_SLEEP_TIME].value, 
                  actual_sleep_rate = sheet[ACTUAL_SLEEP_RATE].value, actual_wake_time=sheet[ACTUAL_WAKE_TIME].value, actual_wake_rate = sheet[ACTUAL_WAKE_RATE].value, 
                  TIB=sheet[TIME_IN_BED].value, sleep_efficiency=sheet[SLEEP_EFFICIENCY].value,lights_out=sheet[LIGHTS_OUT].value, fell_asleep=sheet[FELL_ASLEEP].value, 
-                 sleep_latency=sheet[SLEEP_LATENCY].value ,woke_up=sheet[WOKE_UP].value, got_up=sheet[GOT_UP].value, SFI=sheet[FRAGMENTATION_INDEX].value, activity=activity)
+                 sleep_latency=sheet[SLEEP_LATENCY].value ,woke_up=sheet[WOKE_UP].value, got_up=sheet[GOT_UP].value, SFI=sheet[FRAGMENTATION_INDEX].value, activity=activityDonnees)
     
         stats.append(stat)
+
+        heures = []
+        valeurs = []
 
 
     sheet = workbook2.active
@@ -236,8 +240,9 @@ def loadWorkbook(file_path):
     workbook3 = Workbook()
 
     for instance in stats: 
-        ws = workbook3.create_sheet(title=instance.id)
-        donnees = instance.activity
+        ws = workbook3.create_sheet(title=str(instance.id))
+        ws.append(["Time", "Activity"])
+        donnees = instance.activity[:]
         for i, donnee in enumerate(donnees):
             heure = donnee[0]
             activite = donnee[1]
@@ -245,7 +250,7 @@ def loadWorkbook(file_path):
             ws.cell(row=i+1, column=2, value=activite)
     workbook3.save("test_activite.xlsx")
 
-    
+
     df = pd.DataFrame(pd.read_excel("test.xlsx"))
 
     buttonSelectionFichier.destroy()
