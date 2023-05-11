@@ -234,21 +234,22 @@ def loadWorkbook(file_path):
         fillTable(newdf_temp, "Prout")
 
     workbook.save(filename= "test.xlsx")
-
-
     
     workbook3 = Workbook()
-
+    sheet = workbook3.active
+    sheet.append(["Time", "Activity"])
     for instance in stats: 
-        ws = workbook3.create_sheet(title=str(instance.id))
-        ws.append(["Time", "Activity"])
+        sheetTitle = instance.id + "_" + instance.TEMP
         donnees = instance.activity[:]
+        sheet.title = str(sheetTitle)
         for i, donnee in enumerate(donnees):
             heure = donnee[0]
             activite = donnee[1]
-            ws.cell(row=i+1, column=1, value=heure)
-            ws.cell(row=i+1, column=2, value=activite)
-    workbook3.save("test_activite.xlsx")
+            sheet.cell(row=i+1, column=1, value=heure)
+            sheet.cell(row=i+1, column=2, value=activite)
+        sheet = workbook3.create_sheet() 
+    
+    workbook3.save(filename="test_activite.xlsx")
 
 
     df = pd.DataFrame(pd.read_excel("test.xlsx"))

@@ -9,6 +9,8 @@ optionsTri = ["SFI ordre croissant", "SFI ordre décroissant"]
 optionsTriSE = ["Sleep efficiency ordre croissant", "Sleep efficiency ordre décroissant"]
 
 df = pd.DataFrame(pd.read_excel("test.xlsx"))
+# dfActivity = pd.DataFrame(pd.read_excel("test_activite.xlsx", sheet_name=None, index_col=0))
+# print(dfActivity)
 
 SFI_EC_total = df["SFI"].std()
 SE_EC_total = df["sleep_efficiency (%)"].std()
@@ -87,7 +89,7 @@ plt.savefig("boxplotSFI.png")
 
 
 df["sleep_latency" ] = df["sleep_latency" ] / pd.Timedelta(minutes=1)
-print(df["sleep_latency"])
+#print(df["sleep_latency"])
 dfBoxTimeSL = pd.DataFrame(df[["sleep_latency", "TEMP"]])
 boxfig = dfBoxTimeSL.plot.box(by="TEMP")
 plt.savefig("boxplotSL.png")
@@ -108,3 +110,5 @@ plt.savefig("sleep_latency_all_means.png")
 df = pd.DataFrame(moydf)
 fig3 = df.plot.bar(x = "TEMP", rot = 0,)
 plt.savefig("all_means.png")
+
+
