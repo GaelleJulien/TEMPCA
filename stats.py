@@ -2,8 +2,10 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import datetime as dte
 import numpy as np
+import re
 
 
+#SLEEP FOUNDATION
 
 
 optionsTri = ["SFI ordre croissant", "SFI ordre décroissant"]
@@ -65,7 +67,7 @@ moy = str(moydf)
 moydf["sleep_latency"] =  pd.to_timedelta(moydf["sleep_latency" ])
 
 
-def plotHypnnogramme(temp):
+def plotHypnnogramme(temperature):
     df2 = pd.read_excel("CombinedActivity.xlsx")
 
     
@@ -91,32 +93,40 @@ def plotHypnnogramme(temp):
     
     df3["Sorted"] = df3['DateTime'].map(custom_sort)
     df_sorted = df3.sort_values(by="Sorted")
+    df_sorted = df_sorted.dropna()
+
     df_sorted.reset_index(drop=True)
 
     df_sorted.set_index("Sorted")
 
-    print(df_sorted)
-    
-    colonnes = df_sorted.filter(like = temp).columns.to_list()
-    colonnesTout = df_sorted.filter(like = "_").columns.to_list()
+    # colonnesTout = []
+
+    # for tempColonne in temp : 
+    #         print(tempColonne)
+    #         colonnesTout.append(df_sorted.filter(like = ("_" + tempColonne)).columns.to_list())
+    # print(colonnesTout)
+                
+
+    colonnes = df_sorted.filter(like = temperature).columns.to_list()
+    colonnesTout = df_sorted.filter(like = "_" ).columns.to_list()
     meanActivity = df_sorted[colonnes].mean(axis=1)
     meanActivityAll = df_sorted[colonnesTout].mean(axis=1)
     df_sorted["mean"] = meanActivity
     df_sorted["meanAll"] = meanActivityAll
-    print("kezfegagfejk !")
 
     df_sorted.reset_index(drop=False)
     df_sorted["Sorted"] = df_sorted["Sorted"].dt.strftime("%H:%M:%S")
+
     # fig = df2.plot(x = "Time", y = "mean", legend=False).get_figure()
     # fig.savefig("testPlot2.png")
     # fig = df2.plot(x="Time", y = "mean").get_figure()
     # fig.savefig("testPlot2.png")
 
-    figMean = df_sorted.plot.bar(x = "Sorted", y = "mean", rot = 1, ylim=(0,100)).get_figure()
+    figMean = df_sorted.plot.bar(x = "Sorted", y = "mean", rot = 1, ylim=(0,30), ylabel = "Activité", label = "température : " + temperature).get_figure()
     plt.locator_params(axis='x', nbins=7)
     plt.savefig("testMeanActivity.png")
 
-    toutMean = df_sorted.plot.bar(x = "Sorted", y = "meanAll", rot = 1, ylim=(0,100)).get_figure()
+    toutMean = df_sorted.plot.bar(x = "Sorted", y = "meanAll", rot = 1, ylim=(0,30), ylabel = "Activité", label = "température : " +temperature).get_figure()
     plt.locator_params(axis='x', nbins=7)
     plt.savefig("testAllMeanActivity.png")
 
@@ -157,4 +167,5 @@ df = pd.DataFrame(moydf)
 fig3 = df.plot.bar(x = "TEMP", rot = 0,)
 plt.savefig("all_means.png")
 
-plotHypnnogramme("_24")
+plotHypnnogramme("_32")
+
