@@ -4,7 +4,9 @@ from openpyxl import load_workbook
 from openpyxl.formatting.rule import ColorScaleRule
 from openpyxl.styles import PatternFill
 from openpyxl.chart import Reference, LineChart
-from openpyxl.styles import Font, Color, Alignment, Border, Side
+from openpyxl.styles import Font, Color, Alignment, Border
+from openpyxl.utils.dataframe import dataframe_to_rows
+
 
 from classes import Stats
 from classes import ToplevelWindow, MainWindow
@@ -20,7 +22,7 @@ import pandas as pd
 import pandastable as pt
 from pandastable import Table, TableModel, config
 
-from stats import moy, moydf, users, df, temp, tri, triSE
+from stats import moy, moydf, users, df, temp, tri, triSE, plotHypnnogramme
 
 from PIL import ImageTk, Image
 
@@ -154,7 +156,7 @@ def loadWorkbook(file_path):
         if(choice == tri[2]):
             newdf = df.sort_values(by = "SFI", ascending=False)
 
-        fillTable(newdf, "Prout"), 
+        fillTable(newdf, "Prout")
         
     
     def optionmenu_triSE_callback(choice):
@@ -250,6 +252,53 @@ def loadWorkbook(file_path):
         sheet = workbook3.create_sheet() 
     
     workbook3.save(filename="test_activite.xlsx")
+    workbook3.close()
+
+    combined_df = pd.DataFrame()
+    excel_file = 'test_activite.xlsx'
+    xls = pd.ExcelFile(excel_file)
+    # Parcourir chaque feuille du fichier Excel
+    for sheet_name in xls.sheet_names:
+    # Lire les données de chaque feuille dans un DataFrame
+        dfExcel = pd.read_excel(excel_file, sheet_name=sheet_name, header=None)
+
+        if not dfExcel.empty : 
+            # Renommer les colonnes pour éviter les conflits lors de la concaténation
+            dfExcel.columns = ['Time', str(sheet_name)]
+
+            # Combinaison des données dans le DataFrame global
+            combined_df = pd.concat([combined_df, dfExcel], ignore_index=True)
+
+    distinct_hours = combined_df['Time'].unique()
+    final_data = pd.DataFrame({'Time': distinct_hours})
+
+    for sheet_name in xls.sheet_names:
+        # Lire la feuille sans en-têtes
+        data = pd.read_excel(excel_file, sheet_name=sheet_name, header=None)
+
+        if not data.empty : 
+            # Renommer les colonnes en 'Heure' et 'Valeur'
+            data.columns = ['Time', str(sheet_name) ]
+
+            # Fusionner les données avec le DataFrame final
+            final_data = final_data.merge(data, on='Time', how='left')
+    
+
+    # Remplacer les valeurs manquantes par 0
+    final_data.fillna(0, inplace=True)
+
+    new_file_path = 'CombinedActivity.xlsx'
+    workbook4 = Workbook()
+    # Enregistrer le DataFrame final dans le fichier Excel
+# Écrire les données dans une nouvelle feuille
+    worksheet = workbook4.active
+    worksheet.title = 'Feuille_combinee'
+
+    for row in dataframe_to_rows(final_data, index=False, header=True):
+        worksheet.append(row)
+
+    # Sauvegarder le nouveau classeur Excel
+    workbook4.save(new_file_path)
 
 
     df = pd.DataFrame(pd.read_excel("test.xlsx"))
@@ -427,6 +476,99 @@ def loadWorkbook(file_path):
     fillTable(moydf, "Tab 2")
 
 
+
+    zoom = 0.8
+
+
+    img = Image.open("testMeanActivity.png")
+
+    pixels_x, pixels_y = tuple([int(zoom * x)  for x in img.size])
+    
+    img = ImageTk.PhotoImage(img.resize((pixels_x, pixels_y)))
+    panel = Label(main_window.tabView.tab("Tab 3"), image = img)
+    panel.photo = img
+    panel.grid(column=1, row=1, padx=(20, 20), pady=(10, 10), sticky="nsew")
+
+
+    def radiobuttonSelection2():
+
+        if(radio3_var.get() == "Tous les sujets"):
+            
+            if(radio4_var.get() == "_16"):
+                plotHypnnogramme(radio4_var.get())
+                img = Image.open("testMeanActivity.png")
+            elif(radio4_var.get() == "_24") :
+                plotHypnnogramme(radio4_var.get()) 
+                img = Image.open("testMeanActivity.png")
+            elif(radio4_var.get() == "_32"): 
+                plotHypnnogramme(radio4_var.get()) 
+                img = Image.open("testMeanActivity.png")
+            elif(radio4_var.get() == "Tout"):
+                img = Image.open("testAllMeanActivity.png")
+
+            img = ImageTk.PhotoImage(img.resize((pixels_x, pixels_y)))
+            panel = Label(main_window.tabView.tab("Tab 3"), image = img)
+            panel.photo = img
+            panel.grid(column=1, row=1, padx=(20, 20), pady=(10, 10), sticky="nsew")
+        elif(radio3_var.get() == "autre"): 
+            img = Image.open("testPlot4.png")
+            img = ImageTk.PhotoImage(img.resize((pixels_x, pixels_y)))
+            panel = Label(main_window.tabView.tab("Tab 3"), image = img)
+            panel.photo = img
+            panel.grid(column=1, row=1, padx=(20, 20), pady=(10, 10), sticky="nsew")
+        elif(radio3_var.get() == "Boîtes à moustache"): 
+            if(radio4_var.get() == "SFI"):
+                img = Image.open("boxplotSFI.png")
+            elif(radio4_var.get() == "Sleep efficiency (%)") : 
+                    img = Image.open("boxplotSE.png")
+            elif(radio4_var.get() == "sleep_latency"):
+                    img = Image.open("boxplotSL.png")
+
+            img = ImageTk.PhotoImage(img.resize((pixels_x, pixels_y)))
+            panel = Label(main_window.tabView.tab("Tab 3"), image = img)
+            panel.photo = img
+            panel.grid(column=1, row=1, padx=(20, 20), pady=(10, 10), sticky="nsew")
+
+    radiobutton_frame = customtkinter.CTkFrame(main_window.tabView.tab("Tab 3"))
+    radiobutton_frame.grid(row=1, column=4, padx=(20, 20), pady=(10, 10), sticky="nsew")
+    radio3_var = tk.StringVar(value = "Tous les sujets")
+
+    radiobutton1 = customtkinter.CTkRadioButton(master=radiobutton_frame, variable=radio3_var, value = "Tous les sujets", text="Tous les sujets", command=radiobuttonSelection2)
+    radiobutton1.grid(row=2, column=0, pady=(20, 0), padx=20, sticky="nsew")
+    radiobutton2 = customtkinter.CTkRadioButton(master=radiobutton_frame, variable=radio3_var, value = "autre", text="Cliquez ici si vous aimez Gaëlle", command=radiobuttonSelection2)
+    radiobutton2.grid(row=3, column=0, pady=(20, 0), padx=20, sticky="nsew")
+    radobutton3 = customtkinter.CTkRadioButton(master=radiobutton_frame, variable=radio3_var, value = "Boîtes à moustache", text = "Boîtes à moustache", command=radiobuttonSelection2)
+    radobutton3.grid(row=4, column=0, pady=20, padx=20, sticky="nsew")
+    
+    titre_radioframe = customtkinter.CTkLabel(master=radiobutton_frame, text="Type de graphe : ", font=customtkinter.CTkFont(size=20))
+    titre_radioframe.grid(row=1, column=0,  padx=(20, 20), pady=(10, 10), sticky="nsew")
+
+
+    checkbox_frame.grid_rowconfigure(2, weight=0)
+
+    radiobutton_frame2 = customtkinter.CTkFrame(main_window.tabView.tab("Tab 3"))
+    radiobutton_frame2.grid(row=3, column=4, padx=(20, 20), pady=(10, 10), sticky="nsew")
+    radio4_var = tk.StringVar(value="16")
+    radiobutton3 = customtkinter.CTkRadioButton(master=radiobutton_frame2, variable=radio4_var, value = "_16", text="16", command=radiobuttonSelection2)
+    radiobutton3.grid(row=2, column=0, pady=(20, 0), padx=20, sticky="nsew")
+    radiobutton4 = customtkinter.CTkRadioButton(master=radiobutton_frame2, variable=radio4_var, value = "_24", text="24", command=radiobuttonSelection2)
+    radiobutton4.grid(row=3, column=0, pady=(20, 0), padx=20, sticky="nsew")
+    radiobutton5 = customtkinter.CTkRadioButton(master=radiobutton_frame2, variable=radio4_var, value = "_32", text="32", command=radiobuttonSelection2)
+    radiobutton5.grid(row=4, column=0, pady=(20, 0), padx=20, sticky="nsew")
+    radiobutton6 = customtkinter.CTkRadioButton(master=radiobutton_frame2, variable=radio4_var, value = "Tout", text="Tout", command=radiobuttonSelection2)
+    radiobutton6.grid(row=2, column=1, pady=(20, 0), padx=20, sticky="nsew")
+
+
+    titre_radioframe2 = customtkinter.CTkLabel(master=radiobutton_frame2, text="Variable : ", font=customtkinter.CTkFont(size=20))
+    titre_radioframe2.grid(row=1, column=0,  padx=(20, 20), pady=(10, 10), sticky="nsew")
+    
+    i = 1
+    for temperature in temp[1:] : 
+        checkbox = customtkinter.CTkCheckBox(master=checkbox2_frame, text=temperature, variable=checkbox_var_temp, offvalue = temperature, onvalue = temperature, command=checkbox_temp_callback)
+        checkbox.grid(row=i +1, column=1, padx=(20, 20), pady=(10, 10), sticky="nsew")
+        i = i+1
+    
+    fillTable(moydf, "Tab 3")
 
     
 

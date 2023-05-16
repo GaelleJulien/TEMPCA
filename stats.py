@@ -1,6 +1,8 @@
 import pandas as pd
 import matplotlib.pyplot as plt
 import datetime as dte
+import numpy as np
+
 
 
 
@@ -63,18 +65,62 @@ moy = str(moydf)
 moydf["sleep_latency"] =  pd.to_timedelta(moydf["sleep_latency" ])
 
 
+def plotHypnnogramme(temp):
+    df2 = pd.read_excel("CombinedActivity.xlsx")
 
-# df2 = pd.read_excel("donnees_actimetres.xlsx", "05JB_32", skiprows=18)
-# df2_columns = ["Time", "Activity"]
+    
+    df2['Time'] = pd.to_datetime(df2['Time'],  format="%H:%M:%S")
+    
+    
+    df3 = df2.resample('H', on="Time").mean()
+    df3.index = pd.to_datetime(df3.index)
 
-# df3 = df2[df2_columns]
-# df3["Time"] = (df3["Time"]).astype(str)
-# df3["Activity"] = df3["Activity"].astype(int)
+    df3['DateTime'] = df3.index
 
-# df3.set_index("Time")
-# x_axis = df2["Time"].values
-# fig = df3.plot(x="Time", y = "Activity").get_figure()
-# fig.savefig("testPlot2.png")
+
+    # Définir la plage horaire souhaitée
+    start_time = pd.to_datetime('22:00:00').time()
+    end_time = pd.to_datetime('07:00:00').time()
+
+# Créer une fonction de tri personnalisée
+    def custom_sort(time):
+        if time.time() >= start_time:
+            return time
+        else:
+            return time + pd.DateOffset(days=1)
+    
+    df3["Sorted"] = df3['DateTime'].map(custom_sort)
+    df_sorted = df3.sort_values(by="Sorted")
+    df_sorted.reset_index(drop=True)
+
+    df_sorted.set_index("Sorted")
+
+    print(df_sorted)
+    
+    colonnes = df_sorted.filter(like = temp).columns.to_list()
+    colonnesTout = df_sorted.filter(like = "_").columns.to_list()
+    meanActivity = df_sorted[colonnes].mean(axis=1)
+    meanActivityAll = df_sorted[colonnesTout].mean(axis=1)
+    df_sorted["mean"] = meanActivity
+    df_sorted["meanAll"] = meanActivityAll
+    print("kezfegagfejk !")
+
+    df_sorted.reset_index(drop=False)
+    df_sorted["Sorted"] = df_sorted["Sorted"].dt.strftime("%H:%M:%S")
+    # fig = df2.plot(x = "Time", y = "mean", legend=False).get_figure()
+    # fig.savefig("testPlot2.png")
+    # fig = df2.plot(x="Time", y = "mean").get_figure()
+    # fig.savefig("testPlot2.png")
+
+    figMean = df_sorted.plot.bar(x = "Sorted", y = "mean", rot = 1, ylim=(0,100)).get_figure()
+    plt.locator_params(axis='x', nbins=7)
+    plt.savefig("testMeanActivity.png")
+
+    toutMean = df_sorted.plot.bar(x = "Sorted", y = "meanAll", rot = 1, ylim=(0,100)).get_figure()
+    plt.locator_params(axis='x', nbins=7)
+    plt.savefig("testAllMeanActivity.png")
+
+
 
 
 
@@ -111,4 +157,4 @@ df = pd.DataFrame(moydf)
 fig3 = df.plot.bar(x = "TEMP", rot = 0,)
 plt.savefig("all_means.png")
 
-
+plotHypnnogramme("_24")
