@@ -11,7 +11,7 @@ from openpyxl.utils.dataframe import dataframe_to_rows
 from classes import Stats
 from classes import ToplevelWindow, MainWindow
 from mapping import FRAGMENTATION_INDEX, SLEEP_LATENCY, ACTUAL_WAKE_TIME, SLEEP_EFFICIENCY, LIGHTS_OUT, GOT_UP, TIME_IN_BED, ASSUMED_SLEEP, ACTUAL_SLEEP_TIME
-from mapping import USERID, ACTUAL_SLEEP_RATE, ACTUAL_WAKE_RATE, FELL_ASLEEP, WOKE_UP
+from mapping import USERID, ACTUAL_SLEEP_RATE, ACTUAL_WAKE_RATE, FELL_ASLEEP, WOKE_UP, SLEEP_BOUTS, WAKE_BOUTS, IMMOBILE_BOUTS, MEAN_IMMOBILE_BOUTS
 
 import tkinter as tk
 from tkinter import *
@@ -82,15 +82,26 @@ def loadWorkbook(file_path):
         stat = Stats(id = sheet[USERID].value, TEMP = temperaure, SPT=sheet[ASSUMED_SLEEP].value, TST= sheet[ACTUAL_SLEEP_TIME].value, 
                  actual_sleep_rate = sheet[ACTUAL_SLEEP_RATE].value, actual_wake_time=sheet[ACTUAL_WAKE_TIME].value, actual_wake_rate = sheet[ACTUAL_WAKE_RATE].value, 
                  TIB=sheet[TIME_IN_BED].value, sleep_efficiency=sheet[SLEEP_EFFICIENCY].value,lights_out=sheet[LIGHTS_OUT].value, fell_asleep=sheet[FELL_ASLEEP].value, 
-                 sleep_latency=sheet[SLEEP_LATENCY].value ,woke_up=sheet[WOKE_UP].value, got_up=sheet[GOT_UP].value, SFI=sheet[FRAGMENTATION_INDEX].value, activity=activityDonnees)
+                 sleep_latency=sheet[SLEEP_LATENCY].value ,woke_up=sheet[WOKE_UP].value, got_up=sheet[GOT_UP].value, SFI=sheet[FRAGMENTATION_INDEX].value, activity=activityDonnees,
+                 sleep_bouts=sheet[SLEEP_BOUTS].value, wake_bouts=sheet[WAKE_BOUTS].value, immobile_bouts=sheet[IMMOBILE_BOUTS].value, mean_immobile_bouts=sheet[MEAN_IMMOBILE_BOUTS].value)
     
         stats.append(stat)
-
+        print (stat.immobile_bouts)
         heures = []
         valeurs = []
 
 
     sheet = workbook2.active
+    
+    workbookActivity = Workbook()
+    sheetActivity = workbookActivity.active
+    sheetActivity.append(["UserID", "TEMP", "sleep_bouts", "wake_bouts", "immobile_bouts", "mean_immobile_bouts"])
+    for stat in stats : 
+        dataActivity = [stat.id, stat.TEMP, stat.sleep_bouts, stat.wake_bouts, stat.immobile_bouts, stat.mean_immobile_bouts]
+        sheetActivity.append(dataActivity)
+
+    workbookActivity.save(filename = "activityData.xlsx")
+    workbookActivity.close()
 
 
     workbook = Workbook()
@@ -571,12 +582,6 @@ def loadWorkbook(file_path):
     fillTable(moydf, "Tab 3")
 
     
-
-
-    
-    
-
-
     
 
 def UploadAction():

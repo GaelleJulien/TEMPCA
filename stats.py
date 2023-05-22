@@ -1,6 +1,6 @@
 import pandas as pd
 import matplotlib.pyplot as plt
-import datetime as dte
+import datetime as dt
 import numpy as np
 import re
 
@@ -13,6 +13,8 @@ optionsTri = ["SFI ordre croissant", "SFI ordre décroissant"]
 optionsTriSE = ["Sleep efficiency ordre croissant", "Sleep efficiency ordre décroissant"]
 
 df = pd.DataFrame(pd.read_excel("test.xlsx"))
+df_hour = pd.DataFrame(pd.read_excel("activityData.xlsx"))
+print(df_hour.dtypes)
 # dfActivity = pd.DataFrame(pd.read_excel("test_activite.xlsx", sheet_name=None, index_col=0))
 # print(dfActivity)
 
@@ -31,6 +33,8 @@ df["sleep_latency" ]= df["sleep_latency"].astype("string")
 
 df["sleep_latency" ] = pd.to_timedelta(df["sleep_latency" ])
 
+df_hour["mean_immobile_bouts"] = df_hour["mean_immobile_bouts"].astype("string")
+df_hour["mean_immobile_bouts"] = pd.to_timedelta(df_hour["mean_immobile_bouts"])
 
 
 users.extend(df["UserID"].drop_duplicates().to_list())
@@ -50,7 +54,8 @@ triSE.extend(optionsTriSE)
 moydf = df
 
 moydf = moydf.groupby("TEMP")[["sleep_efficiency (%)", "actual_sleep (%)", "actual_wake (%)", "sleep_latency", "SFI"]].mean()
-
+moydfHour = df_hour.groupby("TEMP")[["sleep_bouts", "wake_bouts", "mean_immobile_bouts"]].mean()
+print(moydfHour)
 
 fig, ax = plt.subplots()
 
@@ -73,12 +78,14 @@ def plotHypnnogramme(temperature):
     
     df2['Time'] = pd.to_datetime(df2['Time'],  format="%H:%M:%S")
     
-    
+
+
+
     df3 = df2.resample('H', on="Time").mean()
     df3.index = pd.to_datetime(df3.index)
 
     df3['DateTime'] = df3.index
-
+    
 
     # Définir la plage horaire souhaitée
     start_time = pd.to_datetime('22:00:00').time()
@@ -99,6 +106,30 @@ def plotHypnnogramme(temperature):
 
     df_sorted.set_index("Sorted")
 
+    df_sorted['Sorted'] = pd.to_datetime(df_sorted['Sorted'], format='%H:%M:%S')
+    
+    df_sorted["Hour"] = (df_sorted["Sorted"].dt.hour)
+    
+    
+    
+    df_hourly = df_sorted.groupby("Hour").mean()
+    df_hourly = df_hourly.drop(columns=["DateTime", "Sorted"])
+
+    print(df_hourly)
+    
+    # Calculer le taux d'éveil pour chaque heure
+    df_hourly['AwakeningRate'] = (df_hourly.iloc[:, 1:] >= 20).mean(axis=1) * 100  # Assuming columns from 1 represent users
+
+    # Create a bar plot to visualize the wakefulness rate per hour
+    fig, ax = plt.subplots()
+    ax.bar(df_hourly.index, df_hourly['AwakeningRate'])
+
+    # Set the labels and title of the plot
+    ax.set_xlabel('Hour')
+    ax.set_ylabel('Wakefulness Rate (%)')
+    ax.set_title('Wakefulness Rate per Hour')
+    plt.savefig("testPlot2.png")
+
     # colonnesTout = []
 
     # for tempColonne in temp : 
@@ -117,10 +148,11 @@ def plotHypnnogramme(temperature):
     df_sorted.reset_index(drop=False)
     df_sorted["Sorted"] = df_sorted["Sorted"].dt.strftime("%H:%M:%S")
 
-    # fig = df2.plot(x = "Time", y = "mean", legend=False).get_figure()
-    # fig.savefig("testPlot2.png")
-    # fig = df2.plot(x="Time", y = "mean").get_figure()
-    # fig.savefig("testPlot2.png")
+    figUser = df_sorted.plot.bar(x = "Sorted", y = "06JS_16", rot = 1, ylim=(0,50), ylabel = "Activité").get_figure()
+    plt.locator_params(axis='x', nbins=7)
+    plt.axhline(y=20,linewidth=1, linestyle='--')
+
+    plt.savefig("O5JB_24.png")
 
     figMean = df_sorted.plot.bar(x = "Sorted", y = "mean", rot = 1, ylim=(0,30), ylabel = "Activité", label = "température : " + temperature).get_figure()
     plt.locator_params(axis='x', nbins=7)
@@ -128,6 +160,8 @@ def plotHypnnogramme(temperature):
 
     toutMean = df_sorted.plot.bar(x = "Sorted", y = "meanAll", rot = 1, ylim=(0,30), ylabel = "Activité", label = "température : " +temperature).get_figure()
     plt.locator_params(axis='x', nbins=7)
+    plt.axhline(y=20,linewidth=1, color='k')
+
     plt.savefig("testAllMeanActivity.png")
 
 

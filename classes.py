@@ -27,6 +27,11 @@ class Stats :
     got_up : datetime
     SFI : float
     activity : list
+    sleep_bouts : int
+    wake_bouts : int
+    immobile_bouts : int
+    mean_immobile_bouts : datetime
+    
 
 
 
