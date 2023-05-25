@@ -22,7 +22,7 @@ import pandas as pd
 import pandastable as pt
 from pandastable import Table, TableModel, config
 
-from stats import moy, moydf, users, df, temp, tri, triSE, plotHypnnogramme
+from stats import moy, moydf, users, df, temp, tri, triSE, plotHypnnogramme, plotHourbyUser, moydfHour
 
 from PIL import ImageTk, Image
 
@@ -68,12 +68,6 @@ def loadWorkbook(file_path):
             valeur = valeurs[i]
             activityDonnees.append([heure, valeur])
 
-
-        
-        # x_axis = df2["Time"].values
-        # fig = df3.plot(x="Time", y = "Activity").get_figure()
-        # fig.savefig("testPlot2.png")
-
         
         #les titres des feuilles sont au format USERID_TEMP (c'est moi qui l'ai décidé nah)
         #  --> n'ayant pas de vraibale température sur MotionWare on récupère la température de la nuit à partir du nom de la feuille
@@ -86,7 +80,6 @@ def loadWorkbook(file_path):
                  sleep_bouts=sheet[SLEEP_BOUTS].value, wake_bouts=sheet[WAKE_BOUTS].value, immobile_bouts=sheet[IMMOBILE_BOUTS].value, mean_immobile_bouts=sheet[MEAN_IMMOBILE_BOUTS].value)
     
         stats.append(stat)
-        print (stat.immobile_bouts)
         heures = []
         valeurs = []
 
@@ -167,7 +160,7 @@ def loadWorkbook(file_path):
         if(choice == tri[2]):
             newdf = df.sort_values(by = "SFI", ascending=False)
 
-        fillTable(newdf, "Prout")
+        fillTable(newdf, "Données")
         
     
     def optionmenu_triSE_callback(choice):
@@ -178,7 +171,7 @@ def loadWorkbook(file_path):
             newdf = df.sort_values(by = "sleep_efficiency (%)")
         if(choice == triSE[2]): 
             newdf = df.sort_values(by = "sleep_efficiency (%)", ascending=False)
-        fillTable(newdf, "Prout")
+        fillTable(newdf, "Données")
 
 
 
@@ -211,7 +204,7 @@ def loadWorkbook(file_path):
 
             newdf_users = df[filtrage]
         
-        fillTable(newdf_users, "Prout")
+        fillTable(newdf_users, "Données")
 
 
 
@@ -244,23 +237,27 @@ def loadWorkbook(file_path):
                 filtrage= (df["TEMP"].astype(str).isin(selected_temps))
             newdf_temp = df[filtrage]
 
-        fillTable(newdf_temp, "Prout")
+        fillTable(newdf_temp, "Données")
 
     workbook.save(filename= "test.xlsx")
     
     workbook3 = Workbook()
     sheet = workbook3.active
     sheet.append(["Time", "Activity"])
-    for instance in stats: 
+    sorted_stats = sorted(stats, key=lambda x: x.activity[0][0])
+    
+    for instance in sorted_stats:
         sheetTitle = instance.id + "_" + instance.TEMP
         donnees = instance.activity[:]
         sheet.title = str(sheetTitle)
         for i, donnee in enumerate(donnees):
             heure = donnee[0]
+            print(donnee[0])
+
             activite = donnee[1]
-            sheet.cell(row=i+1, column=1, value=heure)
-            sheet.cell(row=i+1, column=2, value=activite)
-        sheet = workbook3.create_sheet() 
+            sheet.cell(row=i + 1, column=1, value=heure)
+            sheet.cell(row=i + 1, column=2, value=activite)
+        sheet = workbook3.create_sheet()
     
     workbook3.save(filename="test_activite.xlsx")
     workbook3.close()
@@ -359,16 +356,16 @@ def loadWorkbook(file_path):
             v=[r for r in dt]
             df_tree.insert('','end', values=v)
     
-    fillTable(df, "Prout")
+    fillTable(df, "Données")
 
     optionmenu1_var = customtkinter.StringVar(value=tri[0])
     optionmenu2_var = customtkinter.StringVar(value=triSE[0])
 
-    optionmenu_user = customtkinter.CTkOptionMenu(master=main_window.tabView.tab("Prout"), dynamic_resizing=False, values = tri, command=optionmenu_triSFI_callback, variable=optionmenu1_var)
+    optionmenu_user = customtkinter.CTkOptionMenu(master=main_window.tabView.tab("Données"), dynamic_resizing=False, values = tri, command=optionmenu_triSFI_callback, variable=optionmenu1_var)
     optionmenu_user.grid(row=1, column=1, padx=(100, 100), pady=(20, 20), sticky="nsew")
-    optionmenu_2 = customtkinter.CTkOptionMenu(master=main_window.tabView.tab("Prout"), dynamic_resizing=False, values = triSE, command=optionmenu_triSE_callback, variable=optionmenu2_var)
+    optionmenu_2 = customtkinter.CTkOptionMenu(master=main_window.tabView.tab("Données"), dynamic_resizing=False, values = triSE, command=optionmenu_triSE_callback, variable=optionmenu2_var)
     optionmenu_2.grid(row=1, column=2,  padx=(100, 100), pady=(20, 20), sticky="nsew")
-    optionmenu_3 = customtkinter.CTkOptionMenu(master=main_window.tabView.tab("Prout"), dynamic_resizing=False, values = users, command=optionmenu_triSFI_callback, variable=optionmenu1_var)
+    optionmenu_3 = customtkinter.CTkOptionMenu(master=main_window.tabView.tab("Données"), dynamic_resizing=False, values = users, command=optionmenu_triSFI_callback, variable=optionmenu1_var)
     optionmenu_3.grid(row=1, column=3,  padx=(100, 100), pady=(20, 20), sticky="nsew")
    
     zoom = 0.8
@@ -379,13 +376,13 @@ def loadWorkbook(file_path):
     pixels_x, pixels_y = tuple([int(zoom * x)  for x in img.size])
     
     img = ImageTk.PhotoImage(img.resize((pixels_x, pixels_y)))
-    panel = Label(main_window.tabView.tab("Tab 2"), image = img)
+    panel = Label(main_window.tabView.tab("Stats"), image = img)
     panel.photo = img
     panel.grid(column=1, row=1, padx=(20, 20), pady=(10, 10), sticky="nsew")
 
     checkbox_var_users = customtkinter.StringVar(value=users[0])
 
-    checkbox_frame = customtkinter.CTkScrollableFrame(main_window.tabView.tab("Prout"))
+    checkbox_frame = customtkinter.CTkScrollableFrame(main_window.tabView.tab("Données"))
     checkbox_frame.grid(row=8, column=1, padx=(20, 20), pady=(10, 10), sticky="nsew")
     checkbox_frame.grid_columnconfigure(1, weight=1)
     titre_checkbox = customtkinter.CTkLabel(master=checkbox_frame, text="Filtrer par user(s) : ", font=customtkinter.CTkFont(size=20))
@@ -412,13 +409,13 @@ def loadWorkbook(file_path):
                 img = Image.open("all_means.png")
 
             img = ImageTk.PhotoImage(img.resize((pixels_x, pixels_y)))
-            panel = Label(main_window.tabView.tab("Tab 2"), image = img)
+            panel = Label(main_window.tabView.tab("Stats"), image = img)
             panel.photo = img
             panel.grid(column=1, row=1, padx=(20, 20), pady=(10, 10), sticky="nsew")
         elif(radio_var.get() == "autre"): 
             img = Image.open("testPlot4.png")
             img = ImageTk.PhotoImage(img.resize((pixels_x, pixels_y)))
-            panel = Label(main_window.tabView.tab("Tab 2"), image = img)
+            panel = Label(main_window.tabView.tab("Stats"), image = img)
             panel.photo = img
             panel.grid(column=1, row=1, padx=(20, 20), pady=(10, 10), sticky="nsew")
         elif(radio_var.get() == "Boîtes à moustache"): 
@@ -430,38 +427,37 @@ def loadWorkbook(file_path):
                     img = Image.open("boxplotSL.png")
 
             img = ImageTk.PhotoImage(img.resize((pixels_x, pixels_y)))
-            panel = Label(main_window.tabView.tab("Tab 2"), image = img)
+            panel = Label(main_window.tabView.tab("Stats"), image = img)
             panel.photo = img
             panel.grid(column=1, row=1, padx=(20, 20), pady=(10, 10), sticky="nsew")
 
-    radiobutton_frame = customtkinter.CTkFrame(main_window.tabView.tab("Tab 2"))
-    radiobutton_frame.grid(row=1, column=4, padx=(20, 20), pady=(10, 10), sticky="nsew")
+    radiobutton_frame_tab_2 = customtkinter.CTkFrame(main_window.tabView.tab("Stats"))
+    radiobutton_frame_tab_2.grid(row=1, column=4, padx=(20, 20), pady=(10, 10), sticky="nsew")
     radio_var = tk.StringVar(value = "Histogramme (moyennes)")
 
-    radiobutton1 = customtkinter.CTkRadioButton(master=radiobutton_frame, variable=radio_var, value = "Histogramme (moyennes)", text="Histogramme (moyennes)", command=radiobuttonSelection)
-    radiobutton1.grid(row=2, column=0, pady=(20, 0), padx=20, sticky="nsew")
-    radiobutton2 = customtkinter.CTkRadioButton(master=radiobutton_frame, variable=radio_var, value = "autre", text="Cliquez ici si vous aimez Gaëlle", command=radiobuttonSelection)
-    radiobutton2.grid(row=3, column=0, pady=(20, 0), padx=20, sticky="nsew")
-    radobutton3 = customtkinter.CTkRadioButton(master=radiobutton_frame, variable=radio_var, value = "Boîtes à moustache", text = "Boîtes à moustache", command=radiobuttonSelection)
+    radiobuttonHistogrammeTab2 = customtkinter.CTkRadioButton(master=radiobutton_frame_tab_2, variable=radio_var, value = "Histogramme (moyennes)", text="Histogramme (moyennes)", command=radiobuttonSelection)
+    radiobuttonHistogrammeTab2.grid(row=2, column=0, pady=(20, 0), padx=20, sticky="nsew")
+
+    radobutton3 = customtkinter.CTkRadioButton(master=radiobutton_frame_tab_2, variable=radio_var, value = "Boîtes à moustache", text = "Boîtes à moustache", command=radiobuttonSelection)
     radobutton3.grid(row=4, column=0, pady=20, padx=20, sticky="nsew")
     
-    titre_radioframe = customtkinter.CTkLabel(master=radiobutton_frame, text="Type de graphe : ", font=customtkinter.CTkFont(size=20))
+    titre_radioframe = customtkinter.CTkLabel(master=radiobutton_frame_tab_2, text="Type de graphe : ", font=customtkinter.CTkFont(size=20))
     titre_radioframe.grid(row=1, column=0,  padx=(20, 20), pady=(10, 10), sticky="nsew")
 
 
     checkbox_frame.grid_rowconfigure(2, weight=0)
 
-    radiobutton_frame2 = customtkinter.CTkFrame(main_window.tabView.tab("Tab 2"))
+    radiobutton_frame2 = customtkinter.CTkFrame(main_window.tabView.tab("Stats"))
     radiobutton_frame2.grid(row=3, column=4, padx=(20, 20), pady=(10, 10), sticky="nsew")
     radio2_var = tk.StringVar(value="SFI")
-    radiobutton3 = customtkinter.CTkRadioButton(master=radiobutton_frame2, variable=radio2_var, value = "Sleep efficiency (%)", text="Sleep efficiency (%)", command=radiobuttonSelection)
-    radiobutton3.grid(row=2, column=0, pady=(20, 0), padx=20, sticky="nsew")
-    radiobutton4 = customtkinter.CTkRadioButton(master=radiobutton_frame2, variable=radio2_var, value = "SFI", text="SFI", command=radiobuttonSelection)
-    radiobutton4.grid(row=3, column=0, pady=(20, 0), padx=20, sticky="nsew")
-    radiobutton5 = customtkinter.CTkRadioButton(master=radiobutton_frame2, variable=radio2_var, value = "sleep_latency", text="sleep_latency", command=radiobuttonSelection)
-    radiobutton5.grid(row=4, column=0, pady=(20, 0), padx=20, sticky="nsew")
-    radiobutton6 = customtkinter.CTkRadioButton(master=radiobutton_frame2, variable=radio2_var, value = "Tout", text="Tout", command=radiobuttonSelection)
-    radiobutton6.grid(row=2, column=1, pady=(20, 0), padx=20, sticky="nsew")
+    radiobutton_sleep_efficiency = customtkinter.CTkRadioButton(master=radiobutton_frame2, variable=radio2_var, value = "Sleep efficiency (%)", text="Sleep efficiency (%)", command=radiobuttonSelection)
+    radiobutton_sleep_efficiency.grid(row=2, column=0, pady=(20, 0), padx=20, sticky="nsew")
+    radiobutton_SFI = customtkinter.CTkRadioButton(master=radiobutton_frame2, variable=radio2_var, value = "SFI", text="SFI", command=radiobuttonSelection)
+    radiobutton_SFI.grid(row=3, column=0, pady=(20, 0), padx=20, sticky="nsew")
+    radiobutton_sleep_latency = customtkinter.CTkRadioButton(master=radiobutton_frame2, variable=radio2_var, value = "sleep_latency", text="sleep_latency", command=radiobuttonSelection)
+    radiobutton_sleep_latency.grid(row=4, column=0, pady=(20, 0), padx=20, sticky="nsew")
+    radiobutton_tout = customtkinter.CTkRadioButton(master=radiobutton_frame2, variable=radio2_var, value = "Tout", text="Tout", command=radiobuttonSelection)
+    radiobutton_tout.grid(row=2, column=1, pady=(20, 0), padx=20, sticky="nsew")
 
 
     titre_radioframe2 = customtkinter.CTkLabel(master=radiobutton_frame2, text="Variable : ", font=customtkinter.CTkFont(size=20))
@@ -470,7 +466,7 @@ def loadWorkbook(file_path):
 
     checkbox_var_temp = customtkinter.StringVar(value=temp[0])
 
-    checkbox2_frame = customtkinter.CTkScrollableFrame(main_window.tabView.tab("Prout"))
+    checkbox2_frame = customtkinter.CTkScrollableFrame(main_window.tabView.tab("Données"))
     checkbox2_frame.grid(row=8, column=2, padx=(20, 20), pady=(10, 10), sticky="nsew")
     checkbox2_frame.grid_columnconfigure(1, weight=1)
 
@@ -484,94 +480,75 @@ def loadWorkbook(file_path):
         i = i+1
     
     statsvar = customtkinter.StringVar(value=moy)
-    fillTable(moydf, "Tab 2")
+    fillTable(moydf, "Stats")
 
 
 
     zoom = 0.8
 
 
-    img = Image.open("testMeanActivity.png")
+    img = Image.open("userHour.png")
 
     pixels_x, pixels_y = tuple([int(zoom * x)  for x in img.size])
     
     img = ImageTk.PhotoImage(img.resize((pixels_x, pixels_y)))
-    panel = Label(main_window.tabView.tab("Tab 3"), image = img)
+    panel = Label(main_window.tabView.tab("Découpage nuit"), image = img)
     panel.photo = img
     panel.grid(column=1, row=1, padx=(20, 20), pady=(10, 10), sticky="nsew")
 
 
     def radiobuttonSelection2():
 
-        if(radio3_var.get() == "Tous les sujets"):
-            
-            if(radio4_var.get() == "_16"):
-                plotHypnnogramme(radio4_var.get())
-                img = Image.open("testMeanActivity.png")
-            elif(radio4_var.get() == "_24") :
-                plotHypnnogramme(radio4_var.get()) 
-                img = Image.open("testMeanActivity.png")
-            elif(radio4_var.get() == "_32"): 
-                plotHypnnogramme(radio4_var.get()) 
-                img = Image.open("testMeanActivity.png")
-            elif(radio4_var.get() == "Tout"):
-                img = Image.open("testAllMeanActivity.png")
+        plotHourbyUser(checkbox3_var.get(), radio4_var.get())
+        img = Image.open("userHour.png")
 
-            img = ImageTk.PhotoImage(img.resize((pixels_x, pixels_y)))
-            panel = Label(main_window.tabView.tab("Tab 3"), image = img)
-            panel.photo = img
-            panel.grid(column=1, row=1, padx=(20, 20), pady=(10, 10), sticky="nsew")
-        elif(radio3_var.get() == "autre"): 
-            img = Image.open("testPlot4.png")
-            img = ImageTk.PhotoImage(img.resize((pixels_x, pixels_y)))
-            panel = Label(main_window.tabView.tab("Tab 3"), image = img)
-            panel.photo = img
-            panel.grid(column=1, row=1, padx=(20, 20), pady=(10, 10), sticky="nsew")
-        elif(radio3_var.get() == "Boîtes à moustache"): 
-            if(radio4_var.get() == "SFI"):
-                img = Image.open("boxplotSFI.png")
-            elif(radio4_var.get() == "Sleep efficiency (%)") : 
-                    img = Image.open("boxplotSE.png")
-            elif(radio4_var.get() == "sleep_latency"):
-                    img = Image.open("boxplotSL.png")
+        img = ImageTk.PhotoImage(img.resize((pixels_x, pixels_y)))
+        panel = Label(main_window.tabView.tab("Découpage nuit"), image = img)
+        panel.photo = img
+        panel.grid(column=1, row=1, padx=(20, 20), pady=(10, 10), sticky="nsew")
 
-            img = ImageTk.PhotoImage(img.resize((pixels_x, pixels_y)))
-            panel = Label(main_window.tabView.tab("Tab 3"), image = img)
-            panel.photo = img
-            panel.grid(column=1, row=1, padx=(20, 20), pady=(10, 10), sticky="nsew")
+    radio3_frame = customtkinter.CTkScrollableFrame(main_window.tabView.tab("Découpage nuit"))
+    radio3_frame.grid(row=1, column=4, padx=(20, 20), pady=(10, 10), sticky="nsew")
+    checkbox3_var = tk.StringVar(value = "05JB")
 
-    radiobutton_frame = customtkinter.CTkFrame(main_window.tabView.tab("Tab 3"))
-    radiobutton_frame.grid(row=1, column=4, padx=(20, 20), pady=(10, 10), sticky="nsew")
-    radio3_var = tk.StringVar(value = "Tous les sujets")
-
-    radiobutton1 = customtkinter.CTkRadioButton(master=radiobutton_frame, variable=radio3_var, value = "Tous les sujets", text="Tous les sujets", command=radiobuttonSelection2)
-    radiobutton1.grid(row=2, column=0, pady=(20, 0), padx=20, sticky="nsew")
-    radiobutton2 = customtkinter.CTkRadioButton(master=radiobutton_frame, variable=radio3_var, value = "autre", text="Cliquez ici si vous aimez Gaëlle", command=radiobuttonSelection2)
-    radiobutton2.grid(row=3, column=0, pady=(20, 0), padx=20, sticky="nsew")
-    radobutton3 = customtkinter.CTkRadioButton(master=radiobutton_frame, variable=radio3_var, value = "Boîtes à moustache", text = "Boîtes à moustache", command=radiobuttonSelection2)
-    radobutton3.grid(row=4, column=0, pady=20, padx=20, sticky="nsew")
     
-    titre_radioframe = customtkinter.CTkLabel(master=radiobutton_frame, text="Type de graphe : ", font=customtkinter.CTkFont(size=20))
-    titre_radioframe.grid(row=1, column=0,  padx=(20, 20), pady=(10, 10), sticky="nsew")
+    def radiobuttonSelection3 () : 
+        plotHourbyUser(checkbox3_var.get(), radio4_var.get())
+        img = Image.open("userHour.png")
 
+        img = ImageTk.PhotoImage(img.resize((pixels_x, pixels_y)))
+        panel = Label(main_window.tabView.tab("Découpage nuit"), image = img)
+        panel.photo = img
+        panel.grid(column=1, row=1, padx=(20, 20), pady=(10, 10), sticky="nsew")
+    
+
+
+    for user in users [1:] : 
+        radio = customtkinter.CTkRadioButton(master=radio3_frame, text=user, variable=checkbox3_var, value = user,command=radiobuttonSelection3)
+        radio.grid(row=i +1, column=1, padx=(20, 20), pady=(10, 10), sticky="nsew")
+        i = i+1
+
+
+    radio4_var = tk.StringVar(value="Tout")
 
     checkbox_frame.grid_rowconfigure(2, weight=0)
 
-    radiobutton_frame2 = customtkinter.CTkFrame(main_window.tabView.tab("Tab 3"))
-    radiobutton_frame2.grid(row=3, column=4, padx=(20, 20), pady=(10, 10), sticky="nsew")
-    radio4_var = tk.StringVar(value="16")
-    radiobutton3 = customtkinter.CTkRadioButton(master=radiobutton_frame2, variable=radio4_var, value = "_16", text="16", command=radiobuttonSelection2)
-    radiobutton3.grid(row=2, column=0, pady=(20, 0), padx=20, sticky="nsew")
-    radiobutton4 = customtkinter.CTkRadioButton(master=radiobutton_frame2, variable=radio4_var, value = "_24", text="24", command=radiobuttonSelection2)
-    radiobutton4.grid(row=3, column=0, pady=(20, 0), padx=20, sticky="nsew")
-    radiobutton5 = customtkinter.CTkRadioButton(master=radiobutton_frame2, variable=radio4_var, value = "_32", text="32", command=radiobuttonSelection2)
-    radiobutton5.grid(row=4, column=0, pady=(20, 0), padx=20, sticky="nsew")
-    radiobutton6 = customtkinter.CTkRadioButton(master=radiobutton_frame2, variable=radio4_var, value = "Tout", text="Tout", command=radiobuttonSelection2)
-    radiobutton6.grid(row=2, column=1, pady=(20, 0), padx=20, sticky="nsew")
+    radiobutton_frame3 = customtkinter.CTkFrame(main_window.tabView.tab("Découpage nuit"))
+    radiobutton_frame3.grid(row=3, column=4, padx=(20, 20), pady=(10, 10), sticky="nsew")
+    radiobutton_sleep_efficiency = customtkinter.CTkRadioButton(master=radiobutton_frame3, variable=radio4_var, value = "_16", text="16", command=radiobuttonSelection2)
+    radiobutton_sleep_efficiency.grid(row=2, column=0, pady=(20, 0), padx=20, sticky="nsew")
+    radiobutton_SFI = customtkinter.CTkRadioButton(master=radiobutton_frame3, variable=radio4_var, value = "_24", text="24", command=radiobuttonSelection2)
+    radiobutton_SFI.grid(row=3, column=0, pady=(20, 0), padx=20, sticky="nsew")
+    radiobutton_sleep_latency = customtkinter.CTkRadioButton(master=radiobutton_frame3, variable=radio4_var, value = "_32", text="32", command=radiobuttonSelection2)
+    radiobutton_sleep_latency.grid(row=4, column=0, pady=(20, 0), padx=20, sticky="nsew")
+    radiobutton_tout = customtkinter.CTkRadioButton(master=radiobutton_frame3, variable=radio4_var, value = "Tout", text="Tout", command=radiobuttonSelection2)
+    radiobutton_tout.grid(row=2, column=1, pady=(20, 0), padx=20, sticky="nsew")
 
 
-    titre_radioframe2 = customtkinter.CTkLabel(master=radiobutton_frame2, text="Variable : ", font=customtkinter.CTkFont(size=20))
-    titre_radioframe2.grid(row=1, column=0,  padx=(20, 20), pady=(10, 10), sticky="nsew")
+
+
+    titre_radioframe2 = customtkinter.CTkLabel(master=radiobutton_frame3, text="Nuit: ", font=customtkinter.CTkFont(size=20))
+    titre_radioframe2.grid(row=0, column=0,  padx=(10, 20), pady=(10, 10), sticky="nsew")
     
     i = 1
     for temperature in temp[1:] : 
@@ -579,7 +556,7 @@ def loadWorkbook(file_path):
         checkbox.grid(row=i +1, column=1, padx=(20, 20), pady=(10, 10), sticky="nsew")
         i = i+1
     
-    fillTable(moydf, "Tab 3")
+    fillTable(moydfHour, "Découpage nuit")
 
     
     
@@ -593,9 +570,9 @@ def UploadAction():
 
 textSelectionFichier = StringVar()
 textSelectionFichier.set("Sélectionner le fichier à traiter")
-main_window.labelSelectionFichier = customtkinter.CTkLabel(master = main_window.tabView.tab("Prout"), textvariable = textSelectionFichier, font=customtkinter.CTkFont(size=40, weight="bold"))
+main_window.labelSelectionFichier = customtkinter.CTkLabel(master = main_window.tabView.tab("Données"), textvariable = textSelectionFichier, font=customtkinter.CTkFont(size=40, weight="bold"))
 main_window.labelSelectionFichier.place(relx=.5, rely=.3, anchor="center")
-buttonSelectionFichier = customtkinter.CTkButton(master = main_window.tabView.tab("Prout"), text='Sélectionner...', command=UploadAction, width=200, height=50, font=customtkinter.CTkFont(size=20))
+buttonSelectionFichier = customtkinter.CTkButton(master = main_window.tabView.tab("Données"), text='Sélectionner...', command=UploadAction, width=200, height=50, font=customtkinter.CTkFont(size=20))
 buttonSelectionFichier.place(relx=.5, rely=.6, anchor="center")
 
 
