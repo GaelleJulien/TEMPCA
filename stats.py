@@ -26,8 +26,85 @@ df_num = df.select_dtypes(include=["float"]).columns
 users = ["Sujets..."]
 df = df.astype({"TEMP" : str})
 df["sleep_latency" ]= df["sleep_latency"].astype("string")
+df["TST" ]= df["TST"].astype("string")
+df["TIB" ]= df["TIB"].astype("string")
+df["SPT" ]= df["SPT"].astype("string")
+df["actual_wake_time" ]= df["actual_wake_time"].astype("string")
+
+
+
+
+
 
 df["sleep_latency" ] = pd.to_timedelta(df["sleep_latency" ])
+df["TST" ] = pd.to_timedelta(df["TST" ])
+df["TIB" ] = pd.to_timedelta(df["TIB" ])
+df["SPT" ] = pd.to_timedelta(df["SPT" ])
+df["actual_wake_time" ] = pd.to_timedelta(df["actual_wake_time" ])
+
+
+
+
+
+
+# Liste des colonnes à traiter
+colonnes_a_traiter = [colonne for colonne in df.columns if df[colonne].dtype != object]  # Exclure les colonnes de type 'object' (chaînes de caractères)
+
+resultats = {}
+
+groupes = df.groupby('TEMP')
+
+for groupe, data_grouped in groupes:
+    resultats[groupe] = {}
+    for colonne in colonnes_a_traiter:
+        if pd.api.types.is_timedelta64_dtype(data_grouped[colonne].dtype):
+            mediane = data_grouped[colonne].mean()
+            ecart_type = data_grouped[colonne].std()
+            resultats[groupe][colonne] = f"{mediane} ± {ecart_type}"
+        else:
+            mediane = round(data_grouped[colonne].mean(), 2)
+            ecart_type = round(data_grouped[colonne].std(), 2)
+            resultats[groupe][colonne] = f"{mediane} ± {ecart_type}"
+
+# Affichage des résultats
+for groupe, colonnes_resultat in resultats.items():
+    print(f"Groupe {groupe}:")
+    for colonne, resultat in colonnes_resultat.items():
+        print(f"{colonne}: {resultat}")
+    print()
+
+df_hour["mean_sleep_bouts" ]= df_hour["mean_sleep_bouts"].astype("string")
+df_hour["mean_wake_bouts" ]= df_hour["mean_wake_bouts"].astype("string")
+
+df_hour["mean_sleep_bouts" ] = pd.to_timedelta(df_hour["mean_sleep_bouts" ])
+df_hour["mean_wake_bouts" ] = pd.to_timedelta(df_hour["mean_wake_bouts" ])
+
+
+# Liste des colonnes à traiter
+colonnes_a_traiter = [colonne for colonne in df_hour.columns if df_hour[colonne].dtype != object]  # Exclure les colonnes de type 'object' (chaînes de caractères)
+
+resultats = {}
+
+groupes = df_hour.groupby('TEMP')
+
+for groupe, data_grouped in groupes:
+    resultats[groupe] = {}
+    for colonne in colonnes_a_traiter:
+        if pd.api.types.is_timedelta64_dtype(data_grouped[colonne].dtype):
+            mediane = data_grouped[colonne].mean()
+            ecart_type = data_grouped[colonne].std()
+            resultats[groupe][colonne] = f"{mediane} ± {ecart_type}"
+        else:
+            mediane = round(data_grouped[colonne].mean(), 2)
+            ecart_type = round(data_grouped[colonne].std(), 2)
+            resultats[groupe][colonne] = f"{mediane} ± {ecart_type}"
+
+# Affichage des résultats
+for groupe, colonnes_resultat in resultats.items():
+    print(f"Groupe {groupe}:")
+    for colonne, resultat in colonnes_resultat.items():
+        print(f"{colonne}: {resultat}")
+    print()
 
 df_hour["mean_immobile_bouts"] = df_hour["mean_immobile_bouts"].astype("string")
 df_hour["mean_immobile_bouts"] = pd.to_timedelta(df_hour["mean_immobile_bouts"])
@@ -49,7 +126,7 @@ triSE.extend(optionsTriSE)
 
 moydf = df
 
-moydf = moydf.groupby("TEMP")[["sleep_efficiency (%)", "actual_sleep (%)", "actual_wake (%)", "sleep_latency", "SFI"]].mean()
+moydf = moydf.groupby("TEMP")[["sleep_efficiency (%)", "TST","actual_sleep (%)", "actual_wake (%)", "sleep_latency", "SFI"]].mean()
 moydfHour = df_hour.groupby("TEMP")[["sleep_bouts", "wake_bouts", "mean_immobile_bouts"]].mean()
 moydfHour.reset_index(inplace=True)
 moydfHour["mean_immobile_bouts"] = moydfHour["mean_immobile_bouts"].astype(str).map(lambda x: x[7:15])
@@ -60,6 +137,8 @@ fig, ax = plt.subplots()
 moydf.reset_index(inplace = True)
 moydf = moydf.rename(columns={"index" : "temperature"})
 moydf["sleep_latency"] = moydf["sleep_latency"].astype(str).map(lambda x: x[7:15])
+moydf["TST"] = moydf["TST"].astype(str).map(lambda x: x[7:15])
+
 
 plotMoy = moydf.plot.bar(x = "TEMP", xlabel = "Température (°C)", ylabel = "????")
 plt.savefig("plotMoyennes.png")
@@ -77,11 +156,11 @@ df2['Time'] = pd.to_datetime(df2['Time'],  format="%H:%M:%S")
 
 
 
-df3 = df2.resample('H', on="Time").mean()
+df3 = df2.resample('45Min', on="Time").mean()
 df3.index = pd.to_datetime(df3.index)
 
 df3['DateTime'] = df3.index
-    
+print(df3)    
 
     # Définir la plage horaire souhaitée
 start_time = pd.to_datetime('22:00:00').time()
@@ -150,6 +229,7 @@ def plotHourbyUser(user, temperature) :
     if(temperature == "Tout") : 
         colonnes = df_sorted.filter(like = user).columns.to_list()
         colonnesTout = df_sorted.filter(like = "_" ).columns.to_list()
+        
     else: 
         colonnes = df_sorted.filter(like = user).filter(like=temperature).columns.to_list()
         colonnesTout = df_sorted.filter(like=temperature).columns.to_list()
@@ -159,15 +239,22 @@ def plotHourbyUser(user, temperature) :
     meanActivity = df_sorted[colonnes].mean(axis=1)
     df_sorted["mean"] = meanActivity
     meanActivityAll = df_sorted[colonnesTout].mean(axis=1)
+
+
     df_sorted["meanAll"] = meanActivityAll
+
+
 
     df_sorted.reset_index(drop=False)
     df_sorted["Sorted"] = df_sorted["Sorted"].dt.strftime("%H:%M:%S")
 
-
-
     figUser = df_sorted.plot(x = "Sorted", y = "meanAll", rot = 1, ylim=(0,50), xlabel = "Heure", ylabel = "Activité", label= "Moy tous les sujets", color = "red")
-    figUser2 = df_sorted.plot.bar(x = "Sorted", y = "mean", rot = 1, ylim=(0,50), xlabel = "Heure", ylabel = "Activité", label= user + " " + temperature, ax = figUser).get_figure()
+    
+    if(temperature == "Tout") : 
+        figUser2 = df_sorted.plot.bar(x = "Sorted", y = "meanAll", rot = 1, ylim=(0,50), xlabel = "Heure", ylabel = "Activité", ax = figUser).get_figure()
+    else :    
+        figUser2 = df_sorted.plot.bar(x = "Sorted", y = "mean", rot = 1, ylim=(0,50), xlabel = "Heure", ylabel = "Activité", label= user + " " + temperature, ax = figUser).get_figure()
+
 
     #figUser = df2.plot(x = "Time", y = colonnes, rot = 1, ylim=(0,50), xlabel = "Heure", ylabel = "Activity", label= user + " " + temperature).get_figure()
 

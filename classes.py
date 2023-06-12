@@ -31,6 +31,8 @@ class Stats :
     wake_bouts : int
     immobile_bouts : int
     mean_immobile_bouts : datetime
+    mean_sleep_bouts : datetime
+    mean_wake_bouts : datetime
     
 
 
@@ -53,11 +55,9 @@ class MainWindow(customtkinter.CTk) :
         super().__init__()
 
         self.title("Gaëlle règne suprême parmi les mortels")
-        self.geometry(f"{1100}x{580}")
 
         self.grid_columnconfigure(1, weight=1)
-        self.grid_columnconfigure((2, 3), weight=1)
-        self.grid_rowconfigure((0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10), weight=1)
+        self.grid_rowconfigure((0,1,4), weight=1)
 
 
         
@@ -86,13 +86,22 @@ class MainWindow(customtkinter.CTk) :
 
         self.toplevel_window = None
 
-        self.tabView = customtkinter.CTkTabview(self, width=1200, corner_radius=0)
-        self.tabView.grid(row=0, column=1, rowspan = 15, columnspan = 3, padx=(20, 20), pady=(10, 10), sticky="nsew")
-        self.tabView.grid_columnconfigure(2, weight=1)
+        self.tabView = customtkinter.CTkTabview(self, corner_radius=0)
+        self.tabView.grid(row=0, column=1,padx=(20, 20), pady=(10, 10), sticky=E+W+N+S)
+        self.tabView.grid_columnconfigure(1, weight=1)
+        self.tabView.grid_rowconfigure(1, weight=1)
+
 
         self.tabView.add("Données")
         self.tabView.add("Stats")
+        self.tabView.tab("Stats").grid_columnconfigure(1, weight=1)
+        self.tabView.tab("Stats").grid_rowconfigure(4, weight=1)
+
         self.tabView.add("Découpage nuit")
+        self.tabView.tab("Découpage nuit").grid_columnconfigure(1, weight=1)
+        self.tabView.tab("Découpage nuit").grid_rowconfigure(4, weight=1)
+
+
         
 
 

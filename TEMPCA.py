@@ -11,7 +11,7 @@ from openpyxl.utils.dataframe import dataframe_to_rows
 from classes import Stats
 from classes import ToplevelWindow, MainWindow
 from mapping import FRAGMENTATION_INDEX, SLEEP_LATENCY, ACTUAL_WAKE_TIME, SLEEP_EFFICIENCY, LIGHTS_OUT, GOT_UP, TIME_IN_BED, ASSUMED_SLEEP, ACTUAL_SLEEP_TIME
-from mapping import USERID, ACTUAL_SLEEP_RATE, ACTUAL_WAKE_RATE, FELL_ASLEEP, WOKE_UP, SLEEP_BOUTS, WAKE_BOUTS, IMMOBILE_BOUTS, MEAN_IMMOBILE_BOUTS
+from mapping import USERID, ACTUAL_SLEEP_RATE, ACTUAL_WAKE_RATE, FELL_ASLEEP, WOKE_UP, SLEEP_BOUTS, WAKE_BOUTS, IMMOBILE_BOUTS, MEAN_IMMOBILE_BOUTS, MEAN_SLEEP_BOUTS, MEAN_WAKE_BOUTS
 
 import tkinter as tk
 from tkinter import *
@@ -77,7 +77,8 @@ def loadWorkbook(file_path):
                  actual_sleep_rate = sheet[ACTUAL_SLEEP_RATE].value, actual_wake_time=sheet[ACTUAL_WAKE_TIME].value, actual_wake_rate = sheet[ACTUAL_WAKE_RATE].value, 
                  TIB=sheet[TIME_IN_BED].value, sleep_efficiency=sheet[SLEEP_EFFICIENCY].value,lights_out=sheet[LIGHTS_OUT].value, fell_asleep=sheet[FELL_ASLEEP].value, 
                  sleep_latency=sheet[SLEEP_LATENCY].value ,woke_up=sheet[WOKE_UP].value, got_up=sheet[GOT_UP].value, SFI=sheet[FRAGMENTATION_INDEX].value, activity=activityDonnees,
-                 sleep_bouts=sheet[SLEEP_BOUTS].value, wake_bouts=sheet[WAKE_BOUTS].value, immobile_bouts=sheet[IMMOBILE_BOUTS].value, mean_immobile_bouts=sheet[MEAN_IMMOBILE_BOUTS].value)
+                 sleep_bouts=sheet[SLEEP_BOUTS].value, wake_bouts=sheet[WAKE_BOUTS].value, immobile_bouts=sheet[IMMOBILE_BOUTS].value, mean_immobile_bouts=sheet[MEAN_IMMOBILE_BOUTS].value,
+                 mean_sleep_bouts=sheet[MEAN_SLEEP_BOUTS].value, mean_wake_bouts=sheet[MEAN_WAKE_BOUTS].value)
     
         stats.append(stat)
         heures = []
@@ -88,9 +89,9 @@ def loadWorkbook(file_path):
     
     workbookActivity = Workbook()
     sheetActivity = workbookActivity.active
-    sheetActivity.append(["UserID", "TEMP", "sleep_bouts", "wake_bouts", "immobile_bouts", "mean_immobile_bouts"])
+    sheetActivity.append(["UserID", "TEMP", "sleep_bouts", "wake_bouts", "immobile_bouts", "mean_immobile_bouts", "mean_sleep_bouts", "mean_wake_bouts"])
     for stat in stats : 
-        dataActivity = [stat.id, stat.TEMP, stat.sleep_bouts, stat.wake_bouts, stat.immobile_bouts, stat.mean_immobile_bouts]
+        dataActivity = [stat.id, stat.TEMP, stat.sleep_bouts, stat.wake_bouts, stat.immobile_bouts, stat.mean_immobile_bouts, stat.mean_sleep_bouts, stat.mean_wake_bouts]
         sheetActivity.append(dataActivity)
 
     workbookActivity.save(filename = "activityData.xlsx")
@@ -252,8 +253,6 @@ def loadWorkbook(file_path):
         sheet.title = str(sheetTitle)
         for i, donnee in enumerate(donnees):
             heure = donnee[0]
-            print(donnee[0])
-
             activite = donnee[1]
             sheet.cell(row=i + 1, column=1, value=heure)
             sheet.cell(row=i + 1, column=2, value=activite)
@@ -384,7 +383,7 @@ def loadWorkbook(file_path):
 
     checkbox_frame = customtkinter.CTkScrollableFrame(main_window.tabView.tab("Données"))
     checkbox_frame.grid(row=8, column=1, padx=(20, 20), pady=(10, 10), sticky="nsew")
-    checkbox_frame.grid_columnconfigure(1, weight=1)
+    checkbox_frame.grid_columnconfigure(0, weight=1)
     titre_checkbox = customtkinter.CTkLabel(master=checkbox_frame, text="Filtrer par user(s) : ", font=customtkinter.CTkFont(size=20))
     titre_checkbox.grid(row=1, column=1,  padx=(20, 20), pady=(10, 10), sticky="nsew")
 
@@ -432,6 +431,7 @@ def loadWorkbook(file_path):
             panel.grid(column=1, row=1, padx=(20, 20), pady=(10, 10), sticky="nsew")
 
     radiobutton_frame_tab_2 = customtkinter.CTkFrame(main_window.tabView.tab("Stats"))
+
     radiobutton_frame_tab_2.grid(row=1, column=4, padx=(20, 20), pady=(10, 10), sticky="nsew")
     radio_var = tk.StringVar(value = "Histogramme (moyennes)")
 
@@ -444,10 +444,8 @@ def loadWorkbook(file_path):
     titre_radioframe = customtkinter.CTkLabel(master=radiobutton_frame_tab_2, text="Type de graphe : ", font=customtkinter.CTkFont(size=20))
     titre_radioframe.grid(row=1, column=0,  padx=(20, 20), pady=(10, 10), sticky="nsew")
 
-
-    checkbox_frame.grid_rowconfigure(2, weight=0)
-
     radiobutton_frame2 = customtkinter.CTkFrame(main_window.tabView.tab("Stats"))
+
     radiobutton_frame2.grid(row=3, column=4, padx=(20, 20), pady=(10, 10), sticky="nsew")
     radio2_var = tk.StringVar(value="SFI")
     radiobutton_sleep_efficiency = customtkinter.CTkRadioButton(master=radiobutton_frame2, variable=radio2_var, value = "Sleep efficiency (%)", text="Sleep efficiency (%)", command=radiobuttonSelection)
@@ -508,6 +506,8 @@ def loadWorkbook(file_path):
         panel.grid(column=1, row=1, padx=(20, 20), pady=(10, 10), sticky="nsew")
 
     radio3_frame = customtkinter.CTkScrollableFrame(main_window.tabView.tab("Découpage nuit"))
+    radio3_frame.grid_columnconfigure(1, weight=1)
+
     radio3_frame.grid(row=1, column=4, padx=(20, 20), pady=(10, 10), sticky="nsew")
     checkbox3_var = tk.StringVar(value = "05JB")
 
@@ -534,7 +534,10 @@ def loadWorkbook(file_path):
     checkbox_frame.grid_rowconfigure(2, weight=0)
 
     radiobutton_frame3 = customtkinter.CTkFrame(main_window.tabView.tab("Découpage nuit"))
+
+    
     radiobutton_frame3.grid(row=3, column=4, padx=(20, 20), pady=(10, 10), sticky="nsew")
+    
     radiobutton_sleep_efficiency = customtkinter.CTkRadioButton(master=radiobutton_frame3, variable=radio4_var, value = "_16", text="16", command=radiobuttonSelection2)
     radiobutton_sleep_efficiency.grid(row=2, column=0, pady=(20, 0), padx=20, sticky="nsew")
     radiobutton_SFI = customtkinter.CTkRadioButton(master=radiobutton_frame3, variable=radio4_var, value = "_24", text="24", command=radiobuttonSelection2)
