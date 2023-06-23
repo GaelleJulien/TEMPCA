@@ -73,7 +73,7 @@ class MainWindow(customtkinter.CTk) :
 
         self.sidebar_button_1 = customtkinter.CTkButton(self.sidebar_frame, text="MAPPING")
         self.sidebar_button_1.grid(row=1, column=0, padx=20, pady=10)
-        self.sidebar_button_2 = customtkinter.CTkButton(self.sidebar_frame )
+        self.sidebar_button_2 = customtkinter.CTkButton(self.sidebar_frame, text = "GENERATION CSV" )
         self.sidebar_button_2.grid(row=2, column=0, padx=20, pady=10)
         self.sidebar_button_3 = customtkinter.CTkButton(self.sidebar_frame)
         self.sidebar_button_3.grid(row=9, column=0, padx=20, pady=10)

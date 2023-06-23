@@ -22,7 +22,7 @@ import pandas as pd
 import pandastable as pt
 from pandastable import Table, TableModel, config
 
-from stats import moy, moydf, users, df, temp, tri, triSE, plotHypnnogramme, plotHourbyUser, moydfHour
+from stats import moy, moydf, users, df, temp, tri, triSE, plotHypnnogramme, plotHourbyUser, moydfHour, df_sorted
 
 from PIL import ImageTk, Image
 
@@ -48,6 +48,7 @@ def ajouter_point(heure, valeur):
 
 def loadWorkbook(file_path):
     workbook2 = load_workbook(filename = file_path)
+    print("loaded")
     workbook2.sheetnames
     stats = []
     selected_users=[]
@@ -55,12 +56,18 @@ def loadWorkbook(file_path):
 
 
 
+
     #parcours des feuilles
     for sheet in workbook2 : 
-    
+        for row in sheet.iter_rows():
+            for cell in row:
+                if cell.value == "Time":
+                    # Récupération des coordonnées de la cellule
+                    coordonnees = cell.coordinate
+                    print(f"La cellule '{cell.value}' a les coordonnées : {coordonnees}")
         activityDonnees = []
 
-        df2 = pd.read_excel(file_path, sheet.title, skiprows=18)
+        df2 = pd.read_excel(file_path, sheet.title, skiprows=15)
         heures = df2['Time']
         valeurs = df2['Activity']
         for i in range(len(heures)):
@@ -72,6 +79,9 @@ def loadWorkbook(file_path):
         #les titres des feuilles sont au format USERID_TEMP (c'est moi qui l'ai décidé nah)
         #  --> n'ayant pas de vraibale température sur MotionWare on récupère la température de la nuit à partir du nom de la feuille
         temperaure = str(sheet.title[-2:])
+            # Parcours des cellules
+
+        
             #remplissage de la classe
         stat = Stats(id = sheet[USERID].value, TEMP = temperaure, SPT=sheet[ASSUMED_SLEEP].value, TST= sheet[ACTUAL_SLEEP_TIME].value, 
                  actual_sleep_rate = sheet[ACTUAL_SLEEP_RATE].value, actual_wake_time=sheet[ACTUAL_WAKE_TIME].value, actual_wake_rate = sheet[ACTUAL_WAKE_RATE].value, 
@@ -307,6 +317,14 @@ def loadWorkbook(file_path):
     # Sauvegarder le nouveau classeur Excel
     workbook4.save(new_file_path)
 
+    def decoupageNuit() : 
+        workbook5 = Workbook()
+        sheet = workbook5.active
+        data = dataframe_to_rows(df_sorted, index = False, header=True)
+
+        for row in data:
+            sheet.append(row)
+        workbook5.save("DécoupageNuit.xlsx")
 
     df = pd.DataFrame(pd.read_excel("test.xlsx"))
 

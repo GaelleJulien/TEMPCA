@@ -33,9 +33,6 @@ df["actual_wake_time" ]= df["actual_wake_time"].astype("string")
 
 
 
-
-
-
 df["sleep_latency" ] = pd.to_timedelta(df["sleep_latency" ])
 df["TST" ] = pd.to_timedelta(df["TST" ])
 df["TIB" ] = pd.to_timedelta(df["TIB" ])
@@ -153,14 +150,16 @@ df2 = pd.read_excel("CombinedActivity.xlsx")
     
 df2['Time'] = pd.to_datetime(df2['Time'],  format="%H:%M:%S")
     
+def taux_sup_20(x):
+    return (x > 20).mean()
 
+df2.set_index("Time", inplace=True)
+df3 = df2.groupby(pd.Grouper(freq="30Min")).apply(lambda x: (x > 20).mean() * 100)
 
-
-df3 = df2.resample('45Min', on="Time").mean()
+#df3 = df2.resample('15Min', on="Time").mean()
 df3.index = pd.to_datetime(df3.index)
 
 df3['DateTime'] = df3.index
-print(df3)    
 
     # Définir la plage horaire souhaitée
 start_time = pd.to_datetime('22:00:00').time()
@@ -173,21 +172,33 @@ def custom_sort(time):
     else:
         return time + pd.DateOffset(days=1)
     
-df3["Sorted"] = df3['DateTime'].map(custom_sort)
-df_sorted = df3.sort_values(by="Sorted")
+df3["Heure"] = df3['DateTime'].map(custom_sort)
+df_sorted = df3.sort_values(by="Heure")
 df_sorted = df_sorted.dropna()
 
 df_sorted.reset_index(drop=True)
 
-df_sorted.set_index("Sorted")
+df_sorted.set_index("Heure")
 
-df_sorted['Sorted'] = pd.to_datetime(df_sorted['Sorted'], format='%H:%M:%S')
+df_sorted['Heure'] = pd.to_datetime(df_sorted['Heure'], format='%H:%M:%S')
 
-df_sorted["Hour"] = (df_sorted["Sorted"].dt.hour)
-    
+df_sorted["Hour"] = (df_sorted["Heure"].dt.hour)
+
+newcolumns = ["Heure"] + [col for col in df_sorted.columns if col !="Heure" ]
+df_sorted = df_sorted[newcolumns]
+
+print(df_sorted)
+
+
+def taux_sup_20(column):
+    count_sup_20 = sum(column > 20)  
+    total_count = len(column)  
+    taux = count_sup_20 / total_count  
+    return taux
+
 
 df_hourly = df_sorted.groupby("Hour", sort=False).mean()
-df_hourly = df_hourly.drop(columns=["DateTime", "Sorted"])
+df_hourly = df_hourly.drop(columns=["DateTime", "Heure"])
 
     
 # Calculer le taux d'éveil pour chaque heure
@@ -209,7 +220,7 @@ def plotHypnnogramme(temperature):
 
     colonnes = df_sorted.filter(like = temperature).columns.to_list()
     colonnesTout = df_sorted.filter(like = "_" ).columns.to_list()
-    df_sorted['Sorted'] = pd.to_datetime(df_sorted['Sorted'], format='%H:%M:%S')
+    df_sorted['Heure'] = pd.to_datetime(df_sorted['Heure'], format='%H:%M:%S')
 
     meanActivity = df_sorted[colonnes].mean(axis=1)
     meanActivityAll = df_sorted[colonnesTout].mean(axis=1)
@@ -217,9 +228,9 @@ def plotHypnnogramme(temperature):
     df_sorted["meanAll"] = meanActivityAll
 
     df_sorted.reset_index(drop=False)
-    df_sorted["Sorted"] = df_sorted["Sorted"].dt.strftime("%H:%M:%S")
+    df_sorted["Heure"] = df_sorted["Heure"].dt.strftime("%H:%M:%S")
 
-    figMean = df_sorted.plot.bar(x = "Sorted", y = "mean", rot = 1, ylim=(0,30),xlabel = "Heure", ylabel = "Activité", label = "température (°C): " + temperature).get_figure()
+    figMean = df_sorted.plot.bar(x = "Heure", y = "mean", rot = 1, ylim=(0,30),xlabel = "Heure", ylabel = "Activité", label = "température (°C): " + temperature).get_figure()
     plt.locator_params(axis='x', nbins=7)
     plt.savefig("testMeanActivity.png")
 
@@ -234,7 +245,7 @@ def plotHourbyUser(user, temperature) :
         colonnes = df_sorted.filter(like = user).filter(like=temperature).columns.to_list()
         colonnesTout = df_sorted.filter(like=temperature).columns.to_list()
     print (colonnes)
-    df_sorted['Sorted'] = pd.to_datetime(df_sorted['Sorted'], format='%H:%M:%S')
+    df_sorted['Heure'] = pd.to_datetime(df_sorted['Heure'], format='%H:%M:%S')
 
     meanActivity = df_sorted[colonnes].mean(axis=1)
     df_sorted["mean"] = meanActivity
@@ -246,14 +257,14 @@ def plotHourbyUser(user, temperature) :
 
 
     df_sorted.reset_index(drop=False)
-    df_sorted["Sorted"] = df_sorted["Sorted"].dt.strftime("%H:%M:%S")
+    df_sorted["Heure"] = df_sorted["Heure"].dt.strftime("%H:%M:%S")
 
-    figUser = df_sorted.plot(x = "Sorted", y = "meanAll", rot = 1, ylim=(0,50), xlabel = "Heure", ylabel = "Activité", label= "Moy tous les sujets", color = "red")
+    figUser = df_sorted.plot(x = "Heure", y = "meanAll", rot = 1, ylim=(0,50), xlabel = "Heure", ylabel = "Activité", label= "Moy tous les sujets", color = "red")
     
     if(temperature == "Tout") : 
-        figUser2 = df_sorted.plot.bar(x = "Sorted", y = "meanAll", rot = 1, ylim=(0,50), xlabel = "Heure", ylabel = "Activité", ax = figUser).get_figure()
+        figUser2 = df_sorted.plot.bar(x = "Heure", y = "meanAll", rot = 1, ylim=(0,50), xlabel = "Heure", ylabel = "Activité", ax = figUser).get_figure()
     else :    
-        figUser2 = df_sorted.plot.bar(x = "Sorted", y = "mean", rot = 1, ylim=(0,50), xlabel = "Heure", ylabel = "Activité", label= user + " " + temperature, ax = figUser).get_figure()
+        figUser2 = df_sorted.plot.bar(x = "Heure", y = "mean", rot = 1, ylim=(0,50), xlabel = "Heure", ylabel = "Activité", label= user + " " + temperature, ax = figUser).get_figure()
 
 
     #figUser = df2.plot(x = "Time", y = colonnes, rot = 1, ylim=(0,50), xlabel = "Heure", ylabel = "Activity", label= user + " " + temperature).get_figure()
