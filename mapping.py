@@ -2,9 +2,9 @@ from openpyxl import Workbook
 from openpyxl import load_workbook
 
 
-workbook2 = load_workbook(filename = "donnees_moi.xlsx")
+workbookCoords = load_workbook(filename = "donnees_moi.xlsx")
 
-sheet = workbook2.active
+sheet = workbookCoords.active
 #parcours des feuilles
 
 for row in sheet.iter_rows():
@@ -89,7 +89,10 @@ for row in sheet.iter_rows():
             # Récupération des coordonnées de la cellule
             FRAGMENTATION_INDEX = cell.coordinate
             print(f"La cellule '{cell.value}' a les coordonnées : {FRAGMENTATION_INDEX}")
-
+        
+        elif cell.value == "Unrounded":
+            # Récupération des coordonnées de la cellule
+            rowsToSkip = cell.row
 
 #mapping
 

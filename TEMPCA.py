@@ -10,8 +10,7 @@ from openpyxl.utils.dataframe import dataframe_to_rows
 
 from classes import Stats
 from classes import ToplevelWindow, MainWindow
-from mapping import FRAGMENTATION_INDEX, SLEEP_LATENCY, ACTUAL_WAKE_TIME, SLEEP_EFFICIENCY, LIGHTS_OUT, GOT_UP, TIME_IN_BED, ASSUMED_SLEEP, ACTUAL_SLEEP_TIME
-from mapping import USERID, ACTUAL_SLEEP_RATE, ACTUAL_WAKE_RATE, FELL_ASLEEP, WOKE_UP, SLEEP_BOUTS, WAKE_BOUTS, IMMOBILE_BOUTS, MEAN_IMMOBILE_BOUTS, MEAN_SLEEP_BOUTS, MEAN_WAKE_BOUTS
+#from mapping import rowsToSkip, USERID, ACTUAL_SLEEP_RATE, ACTUAL_WAKE_RATE, FELL_ASLEEP, WOKE_UP, SLEEP_BOUTS, WAKE_BOUTS, IMMOBILE_BOUTS, MEAN_IMMOBILE_BOUTS, MEAN_SLEEP_BOUTS, MEAN_WAKE_BOUTS, TIME_IN_BED, SLEEP_LATENCY, ASSUMED_SLEEP, SLEEP_EFFICIENCY, ACTUAL_SLEEP_TIME, ACTUAL_WAKE_TIME, LIGHTS_OUT, FRAGMENTATION_INDEX, GOT_UP
 
 import tkinter as tk
 from tkinter import *
@@ -40,6 +39,97 @@ activityDonnees = []
 
 main_window = MainWindow()
 
+workbookCoords = load_workbook(filename = "donnees_moi.xlsx")
+
+sheet = workbookCoords.active
+#parcours des feuilles
+
+for row in sheet.iter_rows():
+    for cell in row:
+        if cell.column != 1 and cell.offset(column=-1).value == "UserID":
+            # Récupération des coordonnées de la cellule
+            USERID = cell.coordinate
+            print(f"La cellule '{cell.value}' a les coordonnées : {USERID}")
+        elif cell.column != 1 and cell.offset(column=-1).value == "Time in bed":
+            # Récupération des coordonnées de la cellule
+            TIME_IN_BED = cell.coordinate
+            print(f"La cellule '{cell.value}' a les coordonnées : {TIME_IN_BED}")
+        elif cell.column != 1 and cell.offset(column=-1).value == "Assumed sleep":
+            # Récupération des coordonnées de la cellule
+            ASSUMED_SLEEP = cell.coordinate
+            print(f"La cellule '{cell.value}' a les coordonnées : {ASSUMED_SLEEP}")
+        elif cell.column != 1 and cell.offset(column=-1).value == "Actual sleep time":
+            # Récupération des coordonnées de la cellule
+            ACTUAL_SLEEP_TIME = cell.coordinate
+            print(f"La cellule '{cell.value}' a les coordonnées : {ACTUAL_SLEEP_TIME}")
+        elif cell.column != 1 and cell.offset(column=-1).value == "Actual wake time":
+            # Récupération des coordonnées de la cellule
+            ACTUAL_WAKE_TIME = cell.coordinate
+            print(f"La cellule '{cell.value}' a les coordonnées : {ACTUAL_WAKE_TIME}")
+        elif cell.column != 1 and cell.offset(column=-1).value == "Actual wake (%)":
+            # Récupération des coordonnées de la cellule
+            ACTUAL_WAKE_RATE = cell.coordinate
+            print(f"La cellule '{cell.value}' a les coordonnées : {ACTUAL_WAKE_RATE}")
+        elif cell.column != 1 and cell.offset(column=-1).value== "Sleep latency":
+            # Récupération des coordonnées de la cellule
+            SLEEP_LATENCY = cell.coordinate
+            print(f"La cellule '{cell.value}' a les coordonnées : {SLEEP_LATENCY}")
+        elif cell.column != 1 and cell.offset(column=-1).value == "Sleep bouts":
+            # Récupération des coordonnées de la cellule
+            SLEEP_BOUTS = cell.coordinate
+            print(f"La cellule '{cell.value}' a les coordonnées : {SLEEP_BOUTS}")
+        elif cell.column != 1 and cell.offset(column=-1).value == "Wake bouts":
+            # Récupération des coordonnées de la cellule
+            WAKE_BOUTS = cell.coordinate
+            print(f"La cellule '{cell.value}' a les coordonnées : {WAKE_BOUTS}")
+        elif cell.column != 1 and cell.offset(column=-1).value == "Mean sleep bout":
+            # Récupération des coordonnées de la cellule
+            MEAN_SLEEP_BOUTS = cell.coordinate
+            print(f"La cellule '{cell.value}' a les coordonnées : {MEAN_SLEEP_BOUTS}")
+        elif cell.column != 1 and cell.offset(column=-1).value == "Mean wake bout":
+            # Récupération des coordonnées de la cellule
+            MEAN_WAKE_BOUTS = cell.coordinate
+            print(f"La cellule '{cell.value}' a les coordonnées : {MEAN_WAKE_BOUTS}")
+        elif cell.column != 1 and cell.offset(column=-1).value == "Immobile bouts":
+            # Récupération des coordonnées de la cellule
+            IMMOBILE_BOUTS = cell.coordinate
+            print(f"La cellule '{cell.value}' a les coordonnées : {IMMOBILE_BOUTS}")
+        elif cell.column != 1 and cell.offset(column=-1).value == "Mean immobile bout":
+            # Récupération des coordonnées de la cellule
+            MEAN_IMMOBILE_BOUTS = cell.coordinate
+            print(f"La cellule '{cell.value}' a les coordonnées : {MEAN_IMMOBILE_BOUTS}")
+        elif cell.column != 1 and cell.offset(column=-1).value == "Lights out":
+            # Récupération des coordonnées de la cellule
+            LIGHTS_OUT = cell.coordinate
+            print(f"La cellule '{cell.value}' a les coordonnées : {LIGHTS_OUT}")
+        elif cell.column != 1 and cell.offset(column=-1).value == "Fell asleep":
+            # Récupération des coordonnées de la cellule
+            FELL_ASLEEP = cell.coordinate
+            print(f"La cellule '{cell.value}' a les coordonnées : {FELL_ASLEEP}")
+        elif cell.column != 1 and cell.offset(column=-1).value == "Woke up":
+            # Récupération des coordonnées de la cellule
+            WOKE_UP = cell.coordinate
+            print(f"La cellule '{cell.value}' a les coordonnées : {WOKE_UP}")
+        elif cell.column != 1 and cell.offset(column=-1).value == "Got up":
+            # Récupération des coordonnées de la cellule
+            GOT_UP = cell.coordinate
+            print(f"La cellule '{cell.value}' a les coordonnées : {GOT_UP}")
+        elif cell.column != 1 and cell.offset(column=-1).value == "Actual sleep (%)":
+            # Récupération des coordonnées de la cellule
+            ACTUAL_SLEEP_RATE = cell.coordinate
+            print(f"La cellule '{cell.value}' a les coordonnées : {ACTUAL_SLEEP_RATE}")
+        elif cell.column != 1 and cell.offset(column=-1).value == "Sleep efficiency (%)":
+            # Récupération des coordonnées de la cellule
+            SLEEP_EFFICIENCY = cell.coordinate
+            print(f"La cellule '{cell.value}' a les coordonnées : {SLEEP_EFFICIENCY}")
+        elif cell.column != 1 and cell.offset(column=-1).value == "Fragmentation Index":
+            # Récupération des coordonnées de la cellule
+            FRAGMENTATION_INDEX = cell.coordinate
+            print(f"La cellule '{cell.value}' a les coordonnées : {FRAGMENTATION_INDEX}")
+        
+        elif cell.value == "Unrounded":
+            # Récupération des coordonnées de la cellule
+            rowsToSkip = cell.row
 
 
 def ajouter_point(heure, valeur):
@@ -48,7 +138,6 @@ def ajouter_point(heure, valeur):
 
 def loadWorkbook(file_path):
     workbook2 = load_workbook(filename = file_path)
-    print("loaded")
     workbook2.sheetnames
     stats = []
     selected_users=[]
@@ -59,15 +148,11 @@ def loadWorkbook(file_path):
 
     #parcours des feuilles
     for sheet in workbook2 : 
-        for row in sheet.iter_rows():
-            for cell in row:
-                if cell.value == "Time":
-                    # Récupération des coordonnées de la cellule
-                    coordonnees = cell.coordinate
-                    print(f"La cellule '{cell.value}' a les coordonnées : {coordonnees}")
+
         activityDonnees = []
 
-        df2 = pd.read_excel(file_path, sheet.title, skiprows=15)
+        df2 = pd.read_excel(file_path, sheet.title, skiprows= rowsToSkip)
+
         heures = df2['Time']
         valeurs = df2['Activity']
         for i in range(len(heures)):
@@ -78,12 +163,12 @@ def loadWorkbook(file_path):
         
         #les titres des feuilles sont au format USERID_TEMP (c'est moi qui l'ai décidé nah)
         #  --> n'ayant pas de vraibale température sur MotionWare on récupère la température de la nuit à partir du nom de la feuille
-        temperaure = str(sheet.title[-2:])
+        nuit = str(sheet.title[-2:])
             # Parcours des cellules
 
         
             #remplissage de la classe
-        stat = Stats(id = sheet[USERID].value, TEMP = temperaure, SPT=sheet[ASSUMED_SLEEP].value, TST= sheet[ACTUAL_SLEEP_TIME].value, 
+        stat = Stats(id = sheet[USERID].value, NUIT = nuit, SPT=sheet[ASSUMED_SLEEP].value, TST= sheet[ACTUAL_SLEEP_TIME].value, 
                  actual_sleep_rate = sheet[ACTUAL_SLEEP_RATE].value, actual_wake_time=sheet[ACTUAL_WAKE_TIME].value, actual_wake_rate = sheet[ACTUAL_WAKE_RATE].value, 
                  TIB=sheet[TIME_IN_BED].value, sleep_efficiency=sheet[SLEEP_EFFICIENCY].value,lights_out=sheet[LIGHTS_OUT].value, fell_asleep=sheet[FELL_ASLEEP].value, 
                  sleep_latency=sheet[SLEEP_LATENCY].value ,woke_up=sheet[WOKE_UP].value, got_up=sheet[GOT_UP].value, SFI=sheet[FRAGMENTATION_INDEX].value, activity=activityDonnees,
@@ -99,9 +184,9 @@ def loadWorkbook(file_path):
     
     workbookActivity = Workbook()
     sheetActivity = workbookActivity.active
-    sheetActivity.append(["UserID", "TEMP", "sleep_bouts", "wake_bouts", "immobile_bouts", "mean_immobile_bouts", "mean_sleep_bouts", "mean_wake_bouts"])
+    sheetActivity.append(["UserID", "NUIT", "sleep_bouts", "wake_bouts", "immobile_bouts", "mean_immobile_bouts", "mean_sleep_bouts", "mean_wake_bouts"])
     for stat in stats : 
-        dataActivity = [stat.id, stat.TEMP, stat.sleep_bouts, stat.wake_bouts, stat.immobile_bouts, stat.mean_immobile_bouts, stat.mean_sleep_bouts, stat.mean_wake_bouts]
+        dataActivity = [stat.id, stat.NUIT, stat.sleep_bouts, stat.wake_bouts, stat.immobile_bouts, stat.mean_immobile_bouts, stat.mean_sleep_bouts, stat.mean_wake_bouts]
         sheetActivity.append(dataActivity)
 
     workbookActivity.save(filename = "activityData.xlsx")
@@ -114,12 +199,12 @@ def loadWorkbook(file_path):
    
 
     #nom des en-têtes
-    sheet.append(["UserID", "TEMP", "TIB", "SPT", "TST", "actual_sleep (%)", "actual_wake_time", "actual_wake (%)", "sleep_efficiency (%)", "lights_out", 
+    sheet.append(["UserID", "NUIT", "TIB", "SPT", "TST", "actual_sleep (%)", "actual_wake_time", "actual_wake (%)", "sleep_efficiency (%)", "lights_out", 
               "fell_asleep", "sleep_latency", "woke_up", "got_up", "SFI"])
 
     #remplissage du tableau
     for stat in stats : 
-        data = [stat.id, stat.TEMP, stat.TIB, stat.SPT, stat.TST, stat.actual_sleep_rate, stat.actual_wake_time, stat.actual_wake_rate,stat.sleep_efficiency,
+        data = [stat.id, stat.NUIT, stat.TIB, stat.SPT, stat.TST, stat.actual_sleep_rate, stat.actual_wake_time, stat.actual_wake_rate,stat.sleep_efficiency,
             stat.lights_out, stat.fell_asleep, stat.sleep_latency, stat.woke_up, stat.got_up, stat.SFI]
         sheet.append(data)
 
@@ -162,6 +247,7 @@ def loadWorkbook(file_path):
     filter = StringVar()
     filter.set(moy)
 
+    workbook.save(filename= "test.xlsx")
 
     def optionmenu_triSFI_callback(choice):
         if(choice == tri[0]):
@@ -192,10 +278,10 @@ def loadWorkbook(file_path):
             print(selected_users)
             if(selected_temps != []):
                 if(selected_users == []) :
-                    filtrage = (df["TEMP"].astype(str).isin(selected_temps)) 
+                    filtrage = (df["NUIT"].astype(str).isin(selected_temps)) 
                     newdf_users = df[filtrage]
                 else :
-                    filtrage= (df["UserID"].isin(selected_users) & df["TEMP"].astype(str).isin(selected_temps))
+                    filtrage= (df["UserID"].isin(selected_users) & df["NUIT"].astype(str).isin(selected_temps))
                     newdf_users = df[filtrage]
 
             else : 
@@ -209,7 +295,7 @@ def loadWorkbook(file_path):
             selected_users.append(checkbox_var_users.get())
             print(selected_users)
             if(selected_temps != []):
-                filtrage= (df["UserID"].isin(selected_users) & df["TEMP"].astype(str).isin(selected_temps))
+                filtrage= (df["UserID"].isin(selected_users) & df["NUIT"].astype(str).isin(selected_temps))
             else : 
                 filtrage= (df["UserID"].isin(selected_users))
 
@@ -228,7 +314,7 @@ def loadWorkbook(file_path):
                     filtrage = (df["UserID"].isin(selected_users)) 
                     newdf_temp = df[filtrage]
                 else:
-                    filtrage= (df["UserID"].isin(selected_users) & df["TEMP"].astype(str).isin(selected_temps))
+                    filtrage= (df["UserID"].isin(selected_users) & df["NUIT"].astype(str).isin(selected_temps))
                     newdf_temp = df[filtrage]
 
 
@@ -236,21 +322,20 @@ def loadWorkbook(file_path):
                 if(selected_temps == []) :
                     newdf_temp = df
                 else : 
-                    filtrage= (df["TEMP"].astype(str).isin(selected_temps))
+                    filtrage= (df["NUIT"].astype(str).isin(selected_temps))
                     newdf_temp = df[filtrage]
             
         else : 
             selected_temps.append(checkbox_var_temp.get())
             print(selected_temps)
             if(selected_users != []):
-                filtrage= (df["TEMP"].astype(str).isin(selected_temps) & df["UserID"].isin(selected_users))
+                filtrage= (df["NUIT"].astype(str).isin(selected_temps) & df["UserID"].isin(selected_users))
             else:
-                filtrage= (df["TEMP"].astype(str).isin(selected_temps))
+                filtrage= (df["NUIT"].astype(str).isin(selected_temps))
             newdf_temp = df[filtrage]
 
         fillTable(newdf_temp, "Données")
 
-    workbook.save(filename= "test.xlsx")
     
     workbook3 = Workbook()
     sheet = workbook3.active
@@ -258,7 +343,7 @@ def loadWorkbook(file_path):
     sorted_stats = sorted(stats, key=lambda x: x.activity[0][0])
     
     for instance in sorted_stats:
-        sheetTitle = instance.id + "_" + instance.TEMP
+        sheetTitle = instance.id + "_" + instance.NUIT
         donnees = instance.activity[:]
         sheet.title = str(sheetTitle)
         for i, donnee in enumerate(donnees):
@@ -317,14 +402,13 @@ def loadWorkbook(file_path):
     # Sauvegarder le nouveau classeur Excel
     workbook4.save(new_file_path)
 
-    def decoupageNuit() : 
-        workbook5 = Workbook()
-        sheet = workbook5.active
-        data = dataframe_to_rows(df_sorted, index = False, header=True)
+    workbook5 = Workbook()
+    sheet = workbook5.active
+    data = dataframe_to_rows(df_sorted, index = False, header=True)
 
-        for row in data:
-            sheet.append(row)
-        workbook5.save("DécoupageNuit.xlsx")
+    for row in data:
+        sheet.append(row)
+    workbook5.save("DécoupageNuit.xlsx")
 
     df = pd.DataFrame(pd.read_excel("test.xlsx"))
 
@@ -486,7 +570,7 @@ def loadWorkbook(file_path):
     checkbox2_frame.grid(row=8, column=2, padx=(20, 20), pady=(10, 10), sticky="nsew")
     checkbox2_frame.grid_columnconfigure(1, weight=1)
 
-    titre_checkbox2 = customtkinter.CTkLabel(master=checkbox2_frame, text="Filtrer par température : ", font=customtkinter.CTkFont(size=20))
+    titre_checkbox2 = customtkinter.CTkLabel(master=checkbox2_frame, text="Filtrer par nuit : ", font=customtkinter.CTkFont(size=20))
     titre_checkbox2.grid(row=1, column=1,  padx=(20, 20), pady=(10, 10), sticky="nsew")
 
     i = 1
@@ -551,20 +635,18 @@ def loadWorkbook(file_path):
 
     checkbox_frame.grid_rowconfigure(2, weight=0)
 
-    radiobutton_frame3 = customtkinter.CTkFrame(main_window.tabView.tab("Découpage nuit"))
+    radiobutton_frame3 = customtkinter.CTkScrollableFrame(main_window.tabView.tab("Découpage nuit"))
 
     
     radiobutton_frame3.grid(row=3, column=4, padx=(20, 20), pady=(10, 10), sticky="nsew")
-    
-    radiobutton_sleep_efficiency = customtkinter.CTkRadioButton(master=radiobutton_frame3, variable=radio4_var, value = "_16", text="16", command=radiobuttonSelection2)
-    radiobutton_sleep_efficiency.grid(row=2, column=0, pady=(20, 0), padx=20, sticky="nsew")
-    radiobutton_SFI = customtkinter.CTkRadioButton(master=radiobutton_frame3, variable=radio4_var, value = "_24", text="24", command=radiobuttonSelection2)
-    radiobutton_SFI.grid(row=3, column=0, pady=(20, 0), padx=20, sticky="nsew")
-    radiobutton_sleep_latency = customtkinter.CTkRadioButton(master=radiobutton_frame3, variable=radio4_var, value = "_32", text="32", command=radiobuttonSelection2)
-    radiobutton_sleep_latency.grid(row=4, column=0, pady=(20, 0), padx=20, sticky="nsew")
-    radiobutton_tout = customtkinter.CTkRadioButton(master=radiobutton_frame3, variable=radio4_var, value = "Tout", text="Tout", command=radiobuttonSelection2)
-    radiobutton_tout.grid(row=2, column=1, pady=(20, 0), padx=20, sticky="nsew")
 
+
+    i = 1
+    for temperature in temp[1:] : 
+        radiobutton_nui_decoupage = customtkinter.CTkRadioButton(master=radiobutton_frame3, text=temperature, value = temperature, variable=radio4_var, command=radiobuttonSelection2)
+        radiobutton_nui_decoupage.grid(row=i +1, column=1, padx=(20, 20), pady=(10, 10), sticky="nsew")
+        i = i+1
+    
 
 
 

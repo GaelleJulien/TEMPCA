@@ -12,7 +12,7 @@ import customtkinter
 @dataclass
 class Stats :
     id : str
-    TEMP : str
+    NUIT : str
     TIB : datetime
     SPT : datetime
     TST : datetime
