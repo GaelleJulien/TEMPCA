@@ -11,45 +11,43 @@ optionsTri = ["SFI ordre croissant", "SFI ordre décroissant"]
 
 optionsTriSE = ["Sleep efficiency ordre croissant", "Sleep efficiency ordre décroissant"]
 
-df = pd.DataFrame(pd.read_excel("test.xlsx"))
+dfTest = pd.DataFrame(pd.read_excel("test.xlsx"))
 df_hour = pd.DataFrame(pd.read_excel("activityData.xlsx"))
 # dfActivity = pd.DataFrame(pd.read_excel("test_activite.xlsx", sheet_name=None, index_col=0))
 # print(dfActivity)
 
-SFI_EC_total = df["SFI"].std()
-SE_EC_total = df["sleep_efficiency (%)"].std()
-AS_EC_total = df["actual_sleep (%)"].std()
+SFI_EC_total = dfTest["SFI"].std()
+SE_EC_total = dfTest["sleep_efficiency (%)"].std()
+AS_EC_total = dfTest["actual_sleep (%)"].std()
 
 
-df_num = df.select_dtypes(include=["float"]).columns
+df_num = dfTest.select_dtypes(include=["float"]).columns
 
 users = ["Sujets..."]
-df = df.astype({"NUIT" : str})
-df["sleep_latency" ]= df["sleep_latency"].astype("string")
-df["TST" ]= df["TST"].astype("string")
-df["TIB" ]= df["TIB"].astype("string")
-df["SPT" ]= df["SPT"].astype("string")
-df["actual_wake_time" ]= df["actual_wake_time"].astype("string")
+dfTest = dfTest.astype({"NUIT" : str})
+dfTest["sleep_latency" ]= dfTest["sleep_latency"].astype("string")
+dfTest["TST" ]= dfTest["TST"].astype("string")
+dfTest["TIB" ]= dfTest["TIB"].astype("string")
+dfTest["SPT" ]= dfTest["SPT"].astype("string")
+dfTest["actual_wake_time" ]= dfTest["actual_wake_time"].astype("string")
 
 
 
-df["sleep_latency" ] = pd.to_timedelta(df["sleep_latency" ])
-df["TST" ] = pd.to_timedelta(df["TST" ])
-df["TIB" ] = pd.to_timedelta(df["TIB" ])
-df["SPT" ] = pd.to_timedelta(df["SPT" ])
-df["actual_wake_time" ] = pd.to_timedelta(df["actual_wake_time" ])
-
-
+dfTest["sleep_latency" ] = pd.to_timedelta(dfTest["sleep_latency" ])
+dfTest["TST" ] = pd.to_timedelta(dfTest["TST" ])
+dfTest["TIB" ] = pd.to_timedelta(dfTest["TIB" ])
+dfTest["SPT" ] = pd.to_timedelta(dfTest["SPT" ])
+dfTest["actual_wake_time" ] = pd.to_timedelta(dfTest["actual_wake_time" ])
 
 
 
 
 # Liste des colonnes à traiter
-colonnes_a_traiter = [colonne for colonne in df.columns if df[colonne].dtype != object]  # Exclure les colonnes de type 'object' (chaînes de caractères)
+colonnes_a_traiter = [colonne for colonne in dfTest.columns if dfTest[colonne].dtype != object]  # Exclure les colonnes de type 'object' (chaînes de caractères)
 
 resultats = {}
 
-groupes = df.groupby('NUIT')
+groupes = dfTest.groupby('NUIT')
 
 for groupe, data_grouped in groupes:
     resultats[groupe] = {}
@@ -95,13 +93,6 @@ for groupe, data_grouped in groupes:
 df_hour["mean_immobile_bouts"] = df_hour["mean_immobile_bouts"].astype("string")
 df_hour["mean_immobile_bouts"] = pd.to_timedelta(df_hour["mean_immobile_bouts"])
 
-users.extend(df["UserID"].drop_duplicates().to_list())
-
-temp = ["Température..."]
-temp.extend(df["NUIT"].drop_duplicates().to_list())
-
-
-
 tri = ["Trier en fonction du SFI..."]
 
 tri.extend(optionsTri)
@@ -109,18 +100,18 @@ tri.extend(optionsTri)
 triSE = ["Trier en fonction de sleep_efficiency..."]
 triSE.extend(optionsTriSE)
 
-moydf = df
+moydf = dfTest
 
 moydf = moydf.groupby("NUIT")[["sleep_efficiency (%)", "TST","actual_sleep (%)", "actual_wake (%)", "sleep_latency", "SFI"]].mean()
 moydfHour = df_hour.groupby("NUIT")[["sleep_bouts", "wake_bouts", "mean_immobile_bouts"]].mean()
 moydfHour.reset_index(inplace=True)
-moydfHour["mean_immobile_bouts"] = moydfHour["mean_immobile_bouts"].astype(str).map(lambda x: x[7:15])
+moydfHour["mean_immobile_bouts"] = moydfHour["mean_immobile_bouts"].astype(str)
 
 
 fig, ax = plt.subplots()
 
 moydf.reset_index(inplace = True)
-moydf = moydf.rename(columns={"index" : "temperature"})
+moydf = moydf.rename(columns={"index" : "nuit"})
 moydf["sleep_latency"] = moydf["sleep_latency"].astype(str).map(lambda x: x[7:15])
 moydf["TST"] = moydf["TST"].astype(str).map(lambda x: x[7:15])
 
@@ -153,7 +144,6 @@ df3['DateTime'] = df3.index
 start_time = pd.to_datetime('22:00:00').time()
 end_time = pd.to_datetime('07:00:00').time()
 
-# Créer une fonction de tri personnalisée
 def custom_sort(time):
     if time.time() >= start_time:
         return time
@@ -175,7 +165,6 @@ df_sorted["Hour"] = (df_sorted["Heure"].dt.hour)
 newcolumns = ["Heure"] + [col for col in df_sorted.columns if col !="Heure" ]
 df_sorted = df_sorted[newcolumns]
 
-print(df_sorted)
 
 
 def taux_sup_20(column):
@@ -193,11 +182,9 @@ df_hourly = df_hourly.drop(columns=["DateTime", "Heure"])
 df_hourly['AwakeningRate'] = (df_hourly.iloc[:, 1:] >= 20).mean(axis=1) * 100  # Assuming columns from 1 represent users
 print(df_hourly)
 
-    # Create a bar plot to visualize the wakefulness rate per hour
 fig, ax = plt.subplots()
 ax.bar(df_hourly.index, df_hourly['AwakeningRate'])
 
-    # Set the labels and title of the plot
 ax.set_xlabel('Heure')
 ax.set_ylabel("Taux d'éveil (%)")
 ax.set_title("Taux d'éveil par heure")
@@ -254,42 +241,39 @@ def plotHourbyUser(user, temperature) :
     else :    
         figUser2 = df_sorted.plot.bar(x = "Heure", y = "mean", rot = 1, ylim=(0,50), xlabel = "Heure", ylabel = "Activité", label= user + " " + temperature, ax = figUser).get_figure()
 
-
-    #figUser = df2.plot(x = "Time", y = colonnes, rot = 1, ylim=(0,50), xlabel = "Heure", ylabel = "Activity", label= user + " " + temperature).get_figure()
-
     plt.locator_params(axis='x', nbins=7)
     plt.savefig("userHour.png")
 
-dfBoxSE = pd.DataFrame(df[["sleep_efficiency (%)", "NUIT"]])
+dfBoxSE = pd.DataFrame(dfTest[["sleep_efficiency (%)", "NUIT"]])
 boxfig = dfBoxSE.plot.box(by="NUIT", xlabel = "Nuit", ylabel = "Sleep efficiency (%)")
 plt.savefig("boxplotSE.png")
 
 
-dfBoxTimeSFI = pd.DataFrame(df[["SFI", "NUIT"]])
+dfBoxTimeSFI = pd.DataFrame(dfTest[["SFI", "NUIT"]])
 boxfig = dfBoxTimeSFI.plot.box(by="NUIT", xlabel = "Nuit", ylabel = "Sleep Fragmentation Index")
 plt.savefig("boxplotSFI.png")
 
 
-df["sleep_latency" ] = df["sleep_latency" ] / pd.Timedelta(minutes=1)
-dfBoxTimeSL = pd.DataFrame(df[["sleep_latency", "NUIT"]])
+dfTest["sleep_latency" ] = dfTest["sleep_latency" ] / pd.Timedelta(minutes=1)
+dfBoxTimeSL = pd.DataFrame(dfTest[["sleep_latency", "NUIT"]])
 boxfig = dfBoxTimeSL.plot.box(by="NUIT", xlabel = "Nuit", ylabel = "Sleep Latency (minutes)")
 plt.savefig("boxplotSL.png")
 
-df = pd.DataFrame(moydf[["sleep_efficiency (%)", "NUIT"]])
-fig2 = df.plot.bar(x = "NUIT", y = "sleep_efficiency (%)", rot = 0, xlabel = "Nuit", ylabel = "Sleep efficiency (%)")
+dfTest = pd.DataFrame(moydf[["sleep_efficiency (%)", "NUIT"]])
+fig2 = dfTest.plot.bar(x = "NUIT", y = "sleep_efficiency (%)", rot = 0, xlabel = "Nuit", ylabel = "Sleep efficiency (%)")
 plt.savefig("sleep_efficiency_all_means.png")
 
-df = pd.DataFrame(moydf[["SFI", "NUIT"]])
-fig2 = df.plot.bar(x = "NUIT", y = "SFI", rot = 0, xlabel = "Nuit", ylabel = "Sleep Fragmentation Index")
+dfTest = pd.DataFrame(moydf[["SFI", "NUIT"]])
+fig2 = dfTest.plot.bar(x = "NUIT", y = "SFI", rot = 0, xlabel = "Nuit", ylabel = "Sleep Fragmentation Index")
 plt.savefig("sfi_all_means.png")
 
 moydf["sleep_latency" ] = moydf["sleep_latency" ] / pd.Timedelta(minutes=1)
-df = pd.DataFrame(moydf[["sleep_latency", "NUIT"]])
-fig3 = df.plot.bar(x = "NUIT", y = "sleep_latency", rot = 0, xlabel = "Nuit", ylabel = "Sleep Latency (minutes)")
+dfTest = pd.DataFrame(moydf[["sleep_latency", "NUIT"]])
+fig3 = dfTest.plot.bar(x = "NUIT", y = "sleep_latency", rot = 0, xlabel = "Nuit", ylabel = "Sleep Latency (minutes)")
 plt.savefig("sleep_latency_all_means.png")
 
-df = pd.DataFrame(moydf)
-fig3 = df.plot.bar(x = "NUIT", rot = 0)
+dfTest = pd.DataFrame(moydf)
+fig3 = dfTest.plot.bar(x = "NUIT", rot = 0)
 plt.savefig("all_means.png")
 
 plotHypnnogramme("_32")
