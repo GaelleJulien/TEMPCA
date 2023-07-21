@@ -52,7 +52,7 @@ def loadWorkbook(file_path):
     workbookCoords = load_workbook(filename = file_path)
 
     sheet = workbookCoords.active
-
+    
     for row in sheet.iter_rows():
         for cell in row:
             if cell.column != 1 and cell.offset(column=-1).value == "UserID":
@@ -772,6 +772,37 @@ def loadWorkbook(file_path):
     
     fillTable(moydfHour, "Découpage nuit")
 
+    def plotHourbyUser(user, temperature) : 
+        if(temperature == "Tout") : 
+            colonnes = df_sorted.filter(like = user).columns.to_list()
+            colonnesTout = df_sorted.filter(like = "_" ).columns.to_list()
+        
+        else: 
+            colonnes = df_sorted.filter(like = user).filter(like=temperature).columns.to_list()
+            colonnesTout = df_sorted.filter(like=temperature).columns.to_list()
+        df_sorted['Heure'] = pd.to_datetime(df_sorted['Heure'], format='%H:%M:%S')
+
+        meanActivity = df_sorted[colonnes].mean(axis=1)
+        df_sorted["mean"] = meanActivity
+        meanActivityAll = df_sorted[colonnesTout].mean(axis=1)
+
+
+        df_sorted["meanAll"] = meanActivityAll
+
+
+        df_sorted.reset_index(drop=False)
+        df_sorted["Heure"] = df_sorted["Heure"].dt.strftime("%H:%M:%S")
+
+        figUser = df_sorted.plot(x = "Heure", y = "meanAll", rot = 1, ylim=(0,50), xlabel = "Heure", ylabel = "Activité", label= "Moy tous les sujets", color = "red")
+    
+        if(temperature == "Tout") : 
+            figUser2 = df_sorted.plot.bar(x = "Heure", y = "meanAll", rot = 1, ylim=(0,50), xlabel = "Heure", ylabel = "Activité", ax = figUser).get_figure()
+        else :    
+            figUser2 = df_sorted.plot.bar(x = "Heure", y = "mean", rot = 1, ylim=(0,50), xlabel = "Heure", ylabel = "Activité", label= user + " " + temperature, ax = figUser).get_figure()
+
+        plt.locator_params(axis='x', nbins=7)
+        plt.savefig("userHour.png")
+
     
     
 
@@ -781,6 +812,11 @@ def UploadAction():
         print (file_path)
         loadWorkbook(file_path)
         textSelectionFichier.set("Filtrage par sujet")
+
+
+
+
+
 
 textSelectionFichier = StringVar()
 textSelectionFichier.set("Sélectionner le fichier à traiter")
