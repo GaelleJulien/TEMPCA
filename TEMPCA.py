@@ -269,9 +269,9 @@ def loadWorkbook(file_path):
         return (x > 20).mean()
 
     df2.set_index("Time", inplace=True)
+    
     df3 = df2.groupby(pd.Grouper(freq="30Min")).apply(lambda x: (x > 20).mean() * 100)
 
-#df3 = df2.resample('15Min', on="Time").mean()
     df3.index = pd.to_datetime(df3.index)
 
     df3['DateTime'] = df3.index
@@ -579,8 +579,7 @@ def loadWorkbook(file_path):
     optionmenu_user.grid(row=1, column=1, padx=(100, 100), pady=(20, 20), sticky="nsew")
     optionmenu_2 = customtkinter.CTkOptionMenu(master=main_window.tabView.tab("Données"), dynamic_resizing=False, values = triSE, command=optionmenu_triSE_callback, variable=optionmenu2_var)
     optionmenu_2.grid(row=1, column=2,  padx=(100, 100), pady=(20, 20), sticky="nsew")
-    optionmenu_3 = customtkinter.CTkOptionMenu(master=main_window.tabView.tab("Données"), dynamic_resizing=False, values = users, command=optionmenu_triSFI_callback, variable=optionmenu1_var)
-    optionmenu_3.grid(row=1, column=3,  padx=(100, 100), pady=(20, 20), sticky="nsew")
+
    
     zoom = 0.8
 
